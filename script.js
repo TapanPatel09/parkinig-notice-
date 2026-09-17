@@ -1,402 +1,359 @@
 /**
- * Live Parking Notice Generator - Core Application Logic
- * Pure Vanilla JavaScript (Client-Side, No Frameworks, No Backend)
+ * Spiritual Program Parking Notice Generator - Core Application Logic
+ * Pure Vanilla JavaScript (Client-Side, Zero Frameworks, Zero Backend)
+ * 16:9 Ultra-HD (1920 × 1080) Live Display & PNG Export Pipeline
  */
 
 (function () {
   'use strict';
 
   /* ==========================================================================
-     CONSTANTS & SVG ASSET REPOSITORY
+     MANUALLY CHANGE THESE LOGO PATHS
+     Set the relative or absolute paths to your event/organization logo files.
      ========================================================================== */
+  const LEFT_LOGO_PATH = "assets/logo-left.png";
+  const RIGHT_LOGO_PATH = "assets/logo-right.png";
 
-  // Built-in Notice Template Definitions (Gujarati & English)
+  /* ==========================================================================
+     BUILT-IN NOTICE TEMPLATES (GUJARATI NOTICES)
+     ========================================================================== */
   const NOTICE_TEMPLATES = {
     wrong_parking: {
       id: 'wrong_parking',
-      titleGu: 'તાત્કાલિક પાર્કિંગ સૂચના',
-      titleEn: 'URGENT PARKING NOTICE',
-      defaultText: 'વાહન નંબર [VEHICLE NUMBER] યોગ્ય જગ્યાએ પાર્ક કરેલ નથી. કૃપા કરીને તેને યોગ્ય જગ્યાએ પાર્ક કરવા વિનંતી.'
+      title: 'વાહન સૂચના',
+      message: 'વાહન નંબર [VEHICLE NUMBER] યોગ્ય જગ્યાએ પાર્ક કરેલ નથી. કૃપા કરીને તેને યોગ્ય જગ્યાએ પાર્ક કરવા વિનંતી.'
     },
     light_on: {
       id: 'light_on',
-      titleGu: 'વાહન લાઇટ ચાલુ સૂચના',
-      titleEn: 'VEHICLE LIGHT ON NOTICE',
-      defaultText: 'વાહન નંબર [VEHICLE NUMBER]ની લાઇટ ચાલુ છે. કૃપા કરીને તાત્કાલિક વાહનની લાઇટ બંધ કરવા વિનંતી છે.'
+      title: 'વાહન સૂચના',
+      message: 'વાહન નંબર [VEHICLE NUMBER]ની લાઇટ ચાલુ છે. કૃપા કરીને તાત્કાલિક વાહનની લાઇટ બંધ કરવા વિનંતી છે.'
     },
     custom: {
       id: 'custom',
-      titleGu: 'પાર્કિંગ જાહેરાત',
-      titleEn: 'PARKING ANNOUNCEMENT',
-      defaultText: 'વાહન નંબર [VEHICLE NUMBER] કૃપા કરીને પાર્કિંગ સ્થળ પરથી દૂર કરવા વિનંતી.'
+      title: 'વાહન સૂચના',
+      message: 'વાહન નંબર [VEHICLE NUMBER] કૃપા કરીને પાર્કિંગ સ્થળ પરથી દૂર કરવા વિનંતી.'
     }
   };
 
-  // High-Quality Crisp Inline Vector Illustrations for Vehicle Types
+  /* ==========================================================================
+     RESTRAINED SPIRITUAL BROWN / NEUTRAL VECTOR ILLUSTRATIONS
+     Inline crisp SVG graphics conforming to the formal spiritual notice design.
+     ========================================================================== */
   const VEHICLE_SVGS = {
     car: `
-      <svg viewBox="0 0 140 70" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <!-- Modern Sedan Silhouette -->
-        <path d="M12 44C12 44 24 22 42 16C58 10 90 10 104 18C116 25 126 36 128 44C132 45 136 48 136 52C136 56 132 58 128 58H118C116 50 108 44 98 44C88 44 80 50 78 58H54C52 50 44 44 34 44C24 44 16 50 14 58H8C4 58 2 55 2 51C2 47 6 44 12 44Z" fill="currentColor" opacity="0.95"/>
-        <!-- Windows -->
-        <path d="M44 20H68V38H26C31 29 37 23 44 20Z" fill="#0b0f19" opacity="0.85"/>
-        <path d="M74 20H98C106 25 112 32 115 38H74V20Z" fill="#0b0f19" opacity="0.85"/>
-        <!-- Headlight & Taillight -->
-        <path d="M126 44C128 46 132 48 134 48V44H126Z" fill="#fef08a"/>
-        <path d="M6 45H2V49H8L6 45Z" fill="#ef4444"/>
+      <svg viewBox="0 0 160 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Sedan Roof & Windows -->
+        <path d="M48 24C58 16 88 15 106 24L124 38H30L48 24Z" fill="#542810" opacity="0.3"/>
+        <path d="M50 25L34 38H76V21C64 21 54 23 50 25Z" fill="#7A4B2A" opacity="0.85"/>
+        <path d="M82 21V38H121L104 25C96 22 88 21 82 21Z" fill="#7A4B2A" opacity="0.85"/>
+        <!-- Car Body Silhouette -->
+        <path d="M14 44C14 44 26 26 46 20C64 15 96 15 112 22C124 28 138 38 142 45C147 47 152 50 152 54C152 58 147 60 142 60H130C128 50 118 42 106 42C94 42 84 50 82 60H56C54 50 44 42 32 42C20 42 10 50 8 60H4C2 60 0 57 0 53C0 49 4 44 14 44Z" fill="#6E381A"/>
+        <!-- Headlight & Tail accent -->
+        <path d="M140 45C144 47 148 48 150 48V45H140Z" fill="#d97706"/>
+        <path d="M4 46H0V50H6L4 46Z" fill="#b45309"/>
         <!-- Wheels -->
-        <circle cx="34" cy="56" r="11" fill="#111827" stroke="#ffffff" stroke-width="2.5"/>
-        <circle cx="34" cy="56" r="4.5" fill="currentColor"/>
-        <circle cx="98" cy="56" r="11" fill="#111827" stroke="#ffffff" stroke-width="2.5"/>
-        <circle cx="98" cy="56" r="4.5" fill="currentColor"/>
+        <circle cx="32" cy="58" r="12" fill="#3D1E0C" stroke="#F7F2E8" stroke-width="2.5"/>
+        <circle cx="32" cy="58" r="5" fill="#d97706"/>
+        <circle cx="106" cy="58" r="12" fill="#3D1E0C" stroke="#F7F2E8" stroke-width="2.5"/>
+        <circle cx="106" cy="58" r="5" fill="#d97706"/>
       </svg>
     `,
     bike: `
-      <svg viewBox="0 0 140 70" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <!-- Motorcycle Wheels -->
-        <circle cx="30" cy="48" r="15" stroke="currentColor" stroke-width="4.5" fill="#111827"/>
-        <circle cx="30" cy="48" r="5" fill="currentColor"/>
-        <circle cx="110" cy="48" r="15" stroke="currentColor" stroke-width="4.5" fill="#111827"/>
-        <circle cx="110" cy="48" r="5" fill="currentColor"/>
+      <svg viewBox="0 0 160 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Wheels -->
+        <circle cx="32" cy="52" r="16" stroke="#6E381A" stroke-width="5" fill="#F7F2E8"/>
+        <circle cx="32" cy="52" r="5" fill="#542810"/>
+        <circle cx="120" cy="52" r="16" stroke="#6E381A" stroke-width="5" fill="#F7F2E8"/>
+        <circle cx="120" cy="52" r="5" fill="#542810"/>
         <!-- Frame & Chassis -->
-        <path d="M30 48L54 36L72 48H90L108 30M110 48L102 24L90 15H80M102 24H86L68 36L48 24H60" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M32 52L58 38L78 52H98L118 32M120 52L112 26L98 16H88M112 26H94L74 38L52 26H66" stroke="#6E381A" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
         <!-- Fuel Tank & Seat -->
-        <path d="M64 22C64 22 72 16 86 16C94 16 98 22 96 26L74 27L64 22Z" fill="currentColor"/>
-        <path d="M48 24C54 24 64 22 68 28H46L48 24Z" fill="#ffffff" opacity="0.9"/>
-        <!-- Handlebar & Headlight -->
-        <line x1="88" y1="12" x2="96" y2="17" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round"/>
-        <path d="M106 20L114 22L108 26Z" fill="#fef08a"/>
+        <path d="M70 24C70 24 78 18 92 18C100 18 104 24 102 28L80 29L70 24Z" fill="#542810"/>
+        <path d="M52 26C58 26 70 24 74 30H50L52 26Z" fill="#7A4B2A"/>
+        <!-- Handlebars -->
+        <line x1="96" y1="13" x2="105" y2="18" stroke="#542810" stroke-width="4" stroke-linecap="round"/>
+        <circle cx="116" cy="22" r="4" fill="#d97706"/>
       </svg>
     `,
     scooter: `
-      <svg viewBox="0 0 140 70" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <svg viewBox="0 0 160 80" fill="none" xmlns="http://www.w3.org/2000/svg">
         <!-- Wheels -->
-        <circle cx="32" cy="50" r="12" stroke="currentColor" stroke-width="4" fill="#111827"/>
-        <circle cx="32" cy="50" r="4" fill="currentColor"/>
-        <circle cx="106" cy="50" r="12" stroke="currentColor" stroke-width="4" fill="#111827"/>
-        <circle cx="106" cy="50" r="4" fill="currentColor"/>
+        <circle cx="36" cy="54" r="13" stroke="#6E381A" stroke-width="4.5" fill="#F7F2E8"/>
+        <circle cx="36" cy="54" r="4.5" fill="#542810"/>
+        <circle cx="118" cy="54" r="13" stroke="#6E381A" stroke-width="4.5" fill="#F7F2E8"/>
+        <circle cx="118" cy="54" r="4.5" fill="#542810"/>
         <!-- Body Cowl & Floorboard -->
-        <path d="M18 42C18 30 30 24 46 24C56 24 64 28 68 36L78 48H96L102 36L92 18H86" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
-        <path d="M22 40C22 30 32 26 46 26C54 26 62 30 66 38L62 48H22V40Z" fill="currentColor" opacity="0.8"/>
+        <path d="M22 45C22 32 34 26 52 26C62 26 70 30 74 38L84 52H106L112 38L102 20H96" stroke="#6E381A" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M26 43C26 32 36 28 52 28C60 28 68 32 72 40L68 52H26V43Z" fill="#7A4B2A" opacity="0.85"/>
         <!-- Seat -->
-        <path d="M34 22C38 18 54 18 64 22L62 26H36L34 22Z" fill="#ffffff"/>
-        <!-- Steering Column & Front Apron -->
-        <path d="M92 18L104 38L106 50M90 14H98" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
-        <circle cx="94" cy="14" r="3.5" fill="#fef08a"/>
+        <path d="M38 24C42 20 60 20 70 24L68 28H40L38 24Z" fill="#542810"/>
+        <!-- Steering Column -->
+        <path d="M102 20L114 40L116 54M100 16H108" stroke="#6E381A" stroke-width="4.5" stroke-linecap="round"/>
+        <circle cx="104" cy="16" r="3.5" fill="#d97706"/>
       </svg>
     `,
     auto: `
-      <svg viewBox="0 0 140 70" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <svg viewBox="0 0 160 80" fill="none" xmlns="http://www.w3.org/2000/svg">
         <!-- Wheels -->
-        <circle cx="36" cy="52" r="11" stroke="currentColor" stroke-width="3.5" fill="#111827"/>
-        <circle cx="36" cy="52" r="3.5" fill="currentColor"/>
-        <circle cx="104" cy="52" r="11" stroke="currentColor" stroke-width="3.5" fill="#111827"/>
-        <circle cx="104" cy="52" r="3.5" fill="currentColor"/>
-        <!-- Cabin Silhouette (Iconic 3-Wheeler Auto) -->
-        <path d="M20 46H16V36C16 26 24 16 38 15H80C86 15 94 20 98 26L112 40V46C112 49 108 52 102 52H96M48 52H92M26 52H18" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="40" cy="56" r="12" stroke="#6E381A" stroke-width="4" fill="#F7F2E8"/>
+        <circle cx="40" cy="56" r="4" fill="#542810"/>
+        <circle cx="116" cy="56" r="12" stroke="#6E381A" stroke-width="4" fill="#F7F2E8"/>
+        <circle cx="116" cy="56" r="4" fill="#542810"/>
+        <!-- Cabin Body -->
+        <path d="M22 50H18V40C18 28 28 17 44 16H90C98 16 106 22 110 28L126 43V50C126 53 122 56 116 56H108M54 56H104M30 56H20" stroke="#6E381A" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
         <!-- Canvas Roof / Hood -->
-        <path d="M20 30C20 20 28 16 40 16H78C84 16 92 20 96 26L102 34H20V30Z" fill="currentColor" opacity="0.9"/>
+        <path d="M22 34C22 22 32 18 46 18H88C94 18 102 22 106 28L114 36H22V34Z" fill="#542810"/>
         <!-- Windshield -->
-        <path d="M84 22H96L106 36H84V22Z" fill="#0b0f19" opacity="0.85"/>
-        <!-- Open Side Door Passenger Frame -->
-        <rect x="36" y="28" width="34" height="18" rx="3" stroke="currentColor" stroke-width="3" fill="#0b0f19" opacity="0.6"/>
-        <circle cx="114" cy="42" r="3" fill="#fef08a"/>
+        <path d="M94 24H106L118 38H94V24Z" fill="#7A4B2A" opacity="0.6"/>
+        <!-- Open Side Door Frame -->
+        <rect x="42" y="30" width="38" height="20" rx="3" stroke="#6E381A" stroke-width="3" fill="#F7F2E8" opacity="0.7"/>
+        <circle cx="128" cy="46" r="3.5" fill="#d97706"/>
       </svg>
     `,
     bus: `
-      <svg viewBox="0 0 140 70" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <!-- Bus Coach Body -->
-        <rect x="12" y="16" width="116" height="38" rx="6" fill="currentColor" opacity="0.95"/>
-        <!-- Windows Row -->
-        <rect x="18" y="22" width="16" height="14" rx="2" fill="#0b0f19"/>
-        <rect x="38" y="22" width="16" height="14" rx="2" fill="#0b0f19"/>
-        <rect x="58" y="22" width="16" height="14" rx="2" fill="#0b0f19"/>
-        <rect x="78" y="22" width="16" height="14" rx="2" fill="#0b0f19"/>
+      <svg viewBox="0 0 160 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Bus Body -->
+        <rect x="14" y="18" width="132" height="42" rx="7" fill="#6E381A"/>
+        <!-- Passenger Windows Row -->
+        <rect x="22" y="24" width="18" height="15" rx="2" fill="#F7F2E8" opacity="0.9"/>
+        <rect x="44" y="24" width="18" height="15" rx="2" fill="#F7F2E8" opacity="0.9"/>
+        <rect x="66" y="24" width="18" height="15" rx="2" fill="#F7F2E8" opacity="0.9"/>
+        <rect x="88" y="24" width="18" height="15" rx="2" fill="#F7F2E8" opacity="0.9"/>
         <!-- Front Windshield -->
-        <path d="M98 22H120C122 22 124 24 124 26V36H98V22Z" fill="#0b0f19"/>
+        <path d="M110 24H136C138 24 140 26 140 28V39H110V24Z" fill="#F7F2E8" opacity="0.9"/>
         <!-- Lights -->
-        <circle cx="124" cy="46" r="3" fill="#fef08a"/>
-        <rect x="12" y="44" width="3" height="6" fill="#ef4444"/>
+        <circle cx="140" cy="50" r="3.5" fill="#d97706"/>
+        <rect x="14" y="48" width="3.5" height="7" fill="#b45309"/>
         <!-- Wheels -->
-        <circle cx="38" cy="54" r="10" stroke="#ffffff" stroke-width="2.5" fill="#111827"/>
-        <circle cx="38" cy="54" r="4" fill="currentColor"/>
-        <circle cx="102" cy="54" r="10" stroke="#ffffff" stroke-width="2.5" fill="#111827"/>
-        <circle cx="102" cy="54" r="4" fill="currentColor"/>
+        <circle cx="44" cy="60" r="11" stroke="#F7F2E8" stroke-width="2.5" fill="#3D1E0C"/>
+        <circle cx="44" cy="60" r="4.5" fill="#d97706"/>
+        <circle cx="118" cy="60" r="11" stroke="#F7F2E8" stroke-width="2.5" fill="#3D1E0C"/>
+        <circle cx="118" cy="60" r="4.5" fill="#d97706"/>
       </svg>
     `,
     truck: `
-      <svg viewBox="0 0 140 70" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <!-- Cargo Body Bed -->
-        <rect x="14" y="18" width="68" height="34" rx="3" fill="currentColor" opacity="0.9"/>
-        <line x1="36" y1="18" x2="36" y2="52" stroke="#0b0f19" stroke-width="2"/>
-        <line x1="58" y1="18" x2="58" y2="52" stroke="#0b0f19" stroke-width="2"/>
-        <!-- Truck Driver Cabin -->
-        <path d="M84 26H108C114 26 122 32 124 38L126 52H84V26Z" fill="currentColor"/>
+      <svg viewBox="0 0 160 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Cargo Bed -->
+        <rect x="16" y="20" width="76" height="38" rx="4" fill="#6E381A"/>
+        <line x1="40" y1="20" x2="40" y2="58" stroke="#542810" stroke-width="2.5"/>
+        <line x1="66" y1="20" x2="66" y2="58" stroke="#542810" stroke-width="2.5"/>
+        <!-- Driver Cabin -->
+        <path d="M96 28H122C130 28 138 34 140 42L142 58H96V28Z" fill="#542810"/>
         <!-- Cabin Window -->
-        <path d="M88 30H106C110 30 114 34 116 38H88V30Z" fill="#0b0f19"/>
+        <path d="M100 32H120C125 32 129 36 131 42H100V32Z" fill="#F7F2E8" opacity="0.85"/>
         <!-- Headlight -->
-        <circle cx="124" cy="46" r="3" fill="#fef08a"/>
-        <!-- Heavy Wheels -->
-        <circle cx="32" cy="54" r="9" stroke="#ffffff" stroke-width="2" fill="#111827"/>
-        <circle cx="32" cy="54" r="3" fill="currentColor"/>
-        <circle cx="52" cy="54" r="9" stroke="#ffffff" stroke-width="2" fill="#111827"/>
-        <circle cx="52" cy="54" r="3" fill="currentColor"/>
-        <circle cx="106" cy="54" r="9" stroke="#ffffff" stroke-width="2" fill="#111827"/>
-        <circle cx="106" cy="54" r="3" fill="currentColor"/>
-      </svg>
-    `,
-    tractor: `
-      <svg viewBox="0 0 140 70" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <!-- Rear Fender Guard -->
-        <path d="M16 46C16 33 26 23 39 23C47 23 54 27 58 34L53 37C50 32 45 28 39 28C29 28 21 36 21 46H16Z" fill="currentColor" opacity="0.9"/>
-        <!-- Driver Seat & Backrest -->
-        <path d="M30 26C30 24 32 22 34 22H39V35H32C30.9 35 30 34.1 30 33V26Z" fill="#ffffff" opacity="0.9"/>
-        <!-- Steering Wheel & Column -->
-        <line x1="58" y1="36" x2="52" y2="28" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
-        <ellipse cx="50" cy="26" rx="5" ry="2.5" fill="none" stroke="#ffffff" stroke-width="2" transform="rotate(-30 50 26)"/>
-        <!-- Tractor Hood / Engine Body -->
-        <path d="M54 34H110C114 34 118 37 118 41V50H54V34Z" fill="currentColor" opacity="0.95"/>
-        <!-- Engine Side Grille / Air Vents -->
-        <line x1="68" y1="38" x2="68" y2="46" stroke="#0b0f19" stroke-width="2.5" stroke-linecap="round"/>
-        <line x1="74" y1="38" x2="74" y2="46" stroke="#0b0f19" stroke-width="2.5" stroke-linecap="round"/>
-        <line x1="80" y1="38" x2="80" y2="46" stroke="#0b0f19" stroke-width="2.5" stroke-linecap="round"/>
-        <!-- Front Grille Panel -->
-        <path d="M112 37V48" stroke="#0b0f19" stroke-width="3.5" stroke-linecap="round"/>
-        <!-- Exhaust Stack / Chimney with Rain Cap -->
-        <path d="M96 16V34" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/>
-        <path d="M93 16C93 14 99 14 99 16H93Z" fill="#ffffff"/>
-        <!-- Air Pre-cleaner Canister -->
-        <rect x="85" y="22" width="6" height="12" rx="2" fill="#0b0f19" opacity="0.9"/>
-        <!-- Front Headlight -->
-        <circle cx="118" cy="40" r="3" fill="#fef08a"/>
-        <!-- Chassis Base Bar -->
-        <rect x="36" y="48" width="70" height="5" rx="2" fill="#111827"/>
-        <!-- Heavy Lug Rear Wheel -->
-        <circle cx="38" cy="46" r="18" fill="#111827" stroke="#ffffff" stroke-width="3"/>
-        <circle cx="38" cy="46" r="11" fill="currentColor" opacity="0.3"/>
-        <circle cx="38" cy="46" r="6" fill="currentColor"/>
-        <!-- Front Steer Wheel -->
-        <circle cx="106" cy="52" r="11" fill="#111827" stroke="#ffffff" stroke-width="2.5"/>
-        <circle cx="106" cy="52" r="4.5" fill="currentColor"/>
+        <circle cx="140" cy="50" r="3.5" fill="#d97706"/>
+        <!-- Wheels -->
+        <circle cx="36" cy="60" r="10" stroke="#F7F2E8" stroke-width="2" fill="#3D1E0C"/>
+        <circle cx="36" cy="60" r="4" fill="#d97706"/>
+        <circle cx="58" cy="60" r="10" stroke="#F7F2E8" stroke-width="2" fill="#3D1E0C"/>
+        <circle cx="58" cy="60" r="4" fill="#d97706"/>
+        <circle cx="120" cy="60" r="10" stroke="#F7F2E8" stroke-width="2" fill="#3D1E0C"/>
+        <circle cx="120" cy="60" r="4" fill="#d97706"/>
       </svg>
     `,
     other: `
-      <svg viewBox="0 0 140 70" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <!-- Generic Transport / Vehicle Badge -->
-        <rect x="25" y="16" width="90" height="38" rx="8" stroke="currentColor" stroke-width="4" fill="#0b0f19" opacity="0.8"/>
-        <path d="M40 35L70 18L100 35L70 52L40 35Z" stroke="currentColor" stroke-width="3" fill="none"/>
-        <circle cx="70" cy="35" r="8" fill="currentColor"/>
+      <svg viewBox="0 0 160 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Generic Elegant Vehicle Silhouette -->
+        <path d="M24 48C24 48 34 28 54 22C72 17 98 17 114 24C126 30 134 40 138 48C142 50 146 54 146 58C146 62 142 64 138 64H124C122 54 112 46 102 46C92 46 82 54 80 64H60C58 54 48 46 38 46C28 46 18 54 16 64H10C6 64 4 60 4 56C4 52 8 48 24 48Z" fill="#6E381A"/>
+        <path d="M54 26H80V42H38C44 34 48 28 54 26Z" fill="#F7F2E8" opacity="0.85"/>
+        <path d="M86 26H110C116 30 122 36 125 42H86V26Z" fill="#F7F2E8" opacity="0.85"/>
         <!-- Wheels -->
-        <circle cx="45" cy="54" r="8" stroke="#ffffff" stroke-width="2" fill="#111827"/>
-        <circle cx="95" cy="54" r="8" stroke="#ffffff" stroke-width="2" fill="#111827"/>
+        <circle cx="38" cy="62" r="10" fill="#3D1E0C" stroke="#F7F2E8" stroke-width="2"/>
+        <circle cx="38" cy="62" r="4" fill="#d97706"/>
+        <circle cx="102" cy="62" r="10" fill="#3D1E0C" stroke="#F7F2E8" stroke-width="2"/>
+        <circle cx="102" cy="62" r="4" fill="#d97706"/>
       </svg>
     `
   };
 
-  // Vehicle Gujarati Labels for Badge Display
-  const VEHICLE_LABELS = {
-    car: 'CAR / કાર',
-    bike: 'BIKE / મોટરસાયકલ',
-    scooter: 'SCOOTER / સ્કૂટર',
-    auto: 'AUTO / રિક્ષા',
-    bus: 'BUS / બસ',
-    truck: 'TRUCK / ટ્રક',
-    tractor: 'TRACTOR / ટ્રેક્ટર',
-    other: 'VEHICLE / વાહન'
-  };
-
   /* ==========================================================================
-     APPLICATION STATE
+     APPLICATION STATE STORE
      ========================================================================== */
   const state = {
-    noticeType: 'wrong_parking',   // 'wrong_parking' | 'light_on' | 'custom'
+    noticeType: 'wrong_parking',
     customMessage: 'વાહન નંબર [VEHICLE NUMBER] કૃપા કરીને પાર્કિંગ સ્થળ પરથી દૂર કરવા વિનંતી.',
-    vehicleType: 'car',            // 'car' | 'bike' | 'scooter' | 'auto' | 'bus' | 'truck' | 'tractor' | 'other'
+    vehicleType: 'car',
     customVehicleName: '',
     vehicleNumber: 'GJ01AB1234',
-    programName: 'RAVI SABHA',
-    location: 'PARKING AREA',
-    additionalInfo: '',
-    theme: 'amber',                // 'amber' | 'crimson' | 'royal'
+    noticeTitle: 'વાહન સૂચના',
+    programName: 'SPIRITUAL PROGRAM',
+    location: 'MAIN PARKING AREA',
     isFullscreen: false
   };
 
   /* ==========================================================================
-     DOM ELEMENT REFERENCES
+     CACHED DOM REFERENCES
      ========================================================================== */
   const dom = {
-    // Buttons
-    resetBtn: document.getElementById('resetBtn'),
-    fullscreenBtn: document.getElementById('fullscreenBtn'),
-    downloadBtn: document.getElementById('downloadBtn'),
-    projectorPreviewBtn: document.getElementById('projectorPreviewBtn'),
-    exitFullscreenBtn: document.getElementById('exitFullscreenBtn'),
-    clearVehNumBtn: document.getElementById('clearVehNumBtn'),
-    insertTokenBtn: document.getElementById('insertTokenBtn'),
-
-    // Notice Type Radio Cards
-    cardWrongParking: document.getElementById('cardWrongParking'),
-    cardLightOn: document.getElementById('cardLightOn'),
-    cardCustomNotice: document.getElementById('cardCustomNotice'),
-    noticeRadios: document.querySelectorAll('input[name="noticeType"]'),
-    customNoticeSection: document.getElementById('customNoticeSection'),
-    customNoticeText: document.getElementById('customNoticeText'),
-
-    // Vehicle Type
-    vehButtons: document.querySelectorAll('.veh-btn'),
-    customVehicleWrapper: document.getElementById('customVehicleWrapper'),
-    customVehicleInput: document.getElementById('customVehicleInput'),
-
-    // Vehicle Number
-    vehicleNumberInput: document.getElementById('vehicleNumberInput'),
-    miniPlateNumber: document.getElementById('miniPlateNumber'),
-
-    // Program Details
-    programNameInput: document.getElementById('programNameInput'),
-    locationInput: document.getElementById('locationInput'),
-    additionalInfoInput: document.getElementById('additionalInfoInput'),
-
-    // Themes
-    themeButtons: document.querySelectorAll('.theme-btn'),
-
-    // Preview Stage & Native Canvas
+    // App & Layout
+    appRoot: document.getElementById('appRoot'),
+    controlPanel: document.getElementById('controlPanel'),
     previewStage: document.querySelector('.preview-stage'),
     canvasViewport: document.getElementById('canvasViewport'),
     canvasScaler: document.getElementById('canvasScaler'),
     noticeCanvas: document.getElementById('noticeCanvas'),
+    resolutionTag: document.getElementById('resolutionTag'),
     zoomPercentText: document.getElementById('zoomPercentText'),
+    toastContainer: document.getElementById('toastContainer'),
 
-    // Canvas Elements
+    // Logos
+    leftLogo: document.getElementById('leftLogo'),
+    rightLogo: document.getElementById('rightLogo'),
+
+    // Left Controls
+    noticeRadios: document.querySelectorAll('input[name="noticeType"]'),
+    cardWrongParking: document.getElementById('cardWrongParking'),
+    cardLightOn: document.getElementById('cardLightOn'),
+    cardCustomNotice: document.getElementById('cardCustomNotice'),
+    customNoticeSection: document.getElementById('customNoticeSection'),
+    customNoticeText: document.getElementById('customNoticeText'),
+    insertTokenBtn: document.getElementById('insertTokenBtn'),
+
+    vehButtons: document.querySelectorAll('.veh-btn'),
+    customVehicleWrapper: document.getElementById('customVehicleWrapper'),
+    customVehicleInput: document.getElementById('customVehicleInput'),
+
+    vehicleNumberInput: document.getElementById('vehicleNumberInput'),
+    clearVehNumBtn: document.getElementById('clearVehNumBtn'),
+    miniPlateDisplay: document.getElementById('miniPlateDisplay'),
+    miniPlateNumber: document.getElementById('miniPlateNumber'),
+
+    noticeTitleInput: document.getElementById('noticeTitleInput'),
+    programNameInput: document.getElementById('programNameInput'),
+    locationInput: document.getElementById('locationInput'),
+
+    // Action buttons
+    downloadBtn: document.getElementById('downloadBtn'),
+    fullscreenBtn: document.getElementById('fullscreenBtn'),
+    resetBtn: document.getElementById('resetBtn'),
+    projectorPreviewBtn: document.getElementById('projectorPreviewBtn'),
+    exitFullscreenBtn: document.getElementById('exitFullscreenBtn'),
+    fullscreenExitBar: document.getElementById('fullscreenExitBar'),
+
+    // Canvas Preview Elements
     canvasProgramBanner: document.getElementById('canvasProgramBanner'),
     canvasProgramName: document.getElementById('canvasProgramName'),
-    canvasNoticeTitleGu: document.getElementById('canvasNoticeTitleGu'),
-    canvasNoticeTitleEn: document.getElementById('canvasNoticeTitleEn'),
+    canvasNoticeTitle: document.getElementById('canvasNoticeTitle'),
     canvasVehicleIconWrapper: document.getElementById('canvasVehicleIconWrapper'),
     canvasVehicleTypeBadge: document.getElementById('canvasVehicleTypeBadge'),
     canvasVehicleTypeText: document.getElementById('canvasVehicleTypeText'),
+    canvasPlate: document.getElementById('canvasPlate'),
     canvasPlateNumber: document.getElementById('canvasPlateNumber'),
     canvasNoticeMessage: document.getElementById('canvasNoticeMessage'),
     canvasLocationBlock: document.getElementById('canvasLocationBlock'),
-    canvasLocationName: document.getElementById('canvasLocationName'),
-    canvasExtraBlock: document.getElementById('canvasExtraBlock'),
-    canvasExtraText: document.getElementById('canvasExtraText'),
-
-    // Toast Container
-    toastContainer: document.getElementById('toastContainer')
+    canvasLocationName: document.getElementById('canvasLocationName')
   };
 
   /* ==========================================================================
-     INPUT SANITIZATION & FORMATTING HELPERS
+     UPDATE FUNCTIONS (REACTIVE MODEL-VIEW SYNCHRONIZATION)
      ========================================================================== */
 
   /**
-   * Sanitizes and formats Indian vehicle registration number
-   * - Converts to UPPERCASE
-   * - Removes special characters except alphanumeric & single space
-   * - Trims leading/trailing whitespace
+   * Initializes logo paths based on variables
+   */
+  function setupLogos() {
+    if (dom.leftLogo && LEFT_LOGO_PATH) {
+      dom.leftLogo.src = LEFT_LOGO_PATH;
+    }
+    if (dom.rightLogo && RIGHT_LOGO_PATH) {
+      dom.rightLogo.src = RIGHT_LOGO_PATH;
+    }
+  }
+
+  /**
+   * Sanitizes and standardizes Indian vehicle registration numbers
    */
   function formatVehicleNumber(raw) {
     if (!raw) return '';
-    // Convert to upper case and strip unwanted symbols
-    let cleaned = raw.toUpperCase().replace(/[^A-Z0-9\s]/g, '').trim();
-    // Collapse multi-spaces to single space
-    cleaned = cleaned.replace(/\s+/g, ' ');
-    return cleaned;
+    // Strip leading/trailing whitespaces, convert to uppercase, condense multiple spaces
+    return raw.toUpperCase().replace(/\s+/g, ' ').trim();
   }
 
   /**
-   * Returns a display-safe plate number (or placeholder if empty)
-   */
-  function getSafePlateNumber() {
-    const num = state.vehicleNumber.trim();
-    return num.length > 0 ? num : 'GJ 00 XX 0000';
-  }
-
-  /* ==========================================================================
-     CORE UPDATE CONTROLLERS
-     ========================================================================== */
-
-  /**
-   * Updates the Vehicle Registration Number across sidebar preview,
-   * realistic plate display, and inside notice text
+   * Updates Vehicle Registration Number across all preview components
    */
   function updateVehicleNumber() {
-    const rawVal = dom.vehicleNumberInput.value;
-    const formatted = formatVehicleNumber(rawVal);
+    const rawVal = dom.vehicleNumberInput ? dom.vehicleNumberInput.value : state.vehicleNumber;
+    const cleanNum = formatVehicleNumber(rawVal);
 
-    // Update input if casing/cleaning changed it
-    if (rawVal !== formatted && rawVal.toUpperCase() === formatted) {
-      dom.vehicleNumberInput.value = formatted;
+    // Keep state updated
+    state.vehicleNumber = cleanNum;
+
+    // Update input display to uppercase
+    if (dom.vehicleNumberInput && dom.vehicleNumberInput.value !== cleanNum) {
+      const start = dom.vehicleNumberInput.selectionStart;
+      const end = dom.vehicleNumberInput.selectionEnd;
+      dom.vehicleNumberInput.value = cleanNum;
+      if (start !== null && end !== null) {
+        dom.vehicleNumberInput.setSelectionRange(start, end);
+      }
     }
 
-    state.vehicleNumber = formatted;
-    const safeNumber = getSafePlateNumber();
+    const displayPlate = cleanNum || 'GJ01AB1234';
 
-    // 1. Update Realistic Number Plate
+    // 1. Center Indian Number Plate
     if (dom.canvasPlateNumber) {
-      dom.canvasPlateNumber.textContent = safeNumber;
+      dom.canvasPlateNumber.textContent = displayPlate;
     }
 
-    // 2. Update Sidebar Mini Plate Preview
+    // 2. Sidebar Mini Plate
     if (dom.miniPlateNumber) {
-      dom.miniPlateNumber.textContent = safeNumber;
+      dom.miniPlateNumber.textContent = displayPlate;
     }
 
-    // 3. Re-render notice message to reflect updated plate in Gujarati text
+    // 3. Update text references inside the message
     updateNoticeText();
   }
 
   /**
-   * Updates the Vehicle Icon Illustration & Type Badge on the canvas
+   * Updates Vehicle Illustration & Vehicle Label
    */
   function updateVehicle() {
-    const type = state.vehicleType;
-    const svgCode = VEHICLE_SVGS[type] || VEHICLE_SVGS.car;
+    const type = state.vehicleType || 'car';
+    const svgContent = VEHICLE_SVGS[type] || VEHICLE_SVGS.other;
 
-    // Inject crisp SVG illustration
     if (dom.canvasVehicleIconWrapper) {
-      dom.canvasVehicleIconWrapper.innerHTML = svgCode;
+      dom.canvasVehicleIconWrapper.innerHTML = svgContent;
     }
 
-    // Determine label
-    let labelText = VEHICLE_LABELS[type] || 'VEHICLE';
+    // Format Vehicle Label
+    let label = type.toUpperCase();
     if (type === 'other') {
-      const customName = state.customVehicleName.trim();
-      labelText = customName.length > 0 ? customName.toUpperCase() : 'VEHICLE / વાહન';
+      label = (state.customVehicleName.trim() || 'VEHICLE').toUpperCase();
+    } else if (type === 'auto') {
+      label = 'AUTO RICKSHAW';
     }
 
     if (dom.canvasVehicleTypeText) {
-      dom.canvasVehicleTypeText.textContent = labelText;
+      dom.canvasVehicleTypeText.textContent = label;
     }
   }
 
   /**
-   * Formats and updates the Gujarati message text with vehicle number substitution
+   * Updates Gujarati Notice Message and Notice Title with dynamic sizing
    */
   function updateNoticeText() {
-    const template = NOTICE_TEMPLATES[state.noticeType] || NOTICE_TEMPLATES.wrong_parking;
-
-    // Update Banner Titles
-    if (dom.canvasNoticeTitleGu) dom.canvasNoticeTitleGu.textContent = template.titleGu;
-    if (dom.canvasNoticeTitleEn) dom.canvasNoticeTitleEn.textContent = template.titleEn;
-
-    // Determine raw template message
-    let rawMessage = '';
-    if (state.noticeType === 'custom') {
-      rawMessage = state.customMessage || '';
-      if (!rawMessage.trim()) {
-        rawMessage = 'વાહન નંબર [VEHICLE NUMBER] કૃપા કરીને પાર્કિંગ સ્થળ પરથી દૂર કરવા વિનંતી.';
-      }
-    } else {
-      rawMessage = template.defaultText;
+    // 1. Notice Title
+    if (dom.canvasNoticeTitle) {
+      dom.canvasNoticeTitle.textContent = state.noticeTitle.trim() || 'વાહન સૂચના';
     }
 
-    const safeNumber = getSafePlateNumber();
+    // 2. Message Body
+    let rawMessage = '';
+    if (state.noticeType === 'wrong_parking') {
+      rawMessage = NOTICE_TEMPLATES.wrong_parking.message;
+    } else if (state.noticeType === 'light_on') {
+      rawMessage = NOTICE_TEMPLATES.light_on.message;
+    } else if (state.noticeType === 'custom') {
+      rawMessage = state.customMessage || NOTICE_TEMPLATES.custom.message;
+    }
 
-    // Render message safely with highlighted vehicle number token
+    const safeNumber = state.vehicleNumber.trim() || 'GJ01AB1234';
+
     if (dom.canvasNoticeMessage) {
-      // Clear children safely
-      dom.canvasNoticeMessage.textContent = '';
+      // Clear previous content
+      dom.canvasNoticeMessage.innerHTML = '';
 
       // Check if message contains the token [VEHICLE NUMBER]
       const tokenRegex = /\[VEHICLE NUMBER\]/g;
@@ -409,7 +366,7 @@
           // Insert highlighted plate span between split segments
           if (i < parts.length - 1) {
             const plateSpan = document.createElement('span');
-            plateSpan.className = 'message-plate-highlight';
+            plateSpan.className = 'plate-highlight-token';
             plateSpan.textContent = safeNumber;
             dom.canvasNoticeMessage.appendChild(plateSpan);
           }
@@ -418,13 +375,27 @@
         // Direct text without token
         dom.canvasNoticeMessage.textContent = rawMessage;
       }
+
+      // Dynamic Font Sizing to ensure long text never clips or overflows
+      const totalLen = rawMessage.length;
+      if (totalLen > 140) {
+        dom.canvasNoticeMessage.style.fontSize = '2.0rem';
+        dom.canvasNoticeMessage.style.lineHeight = '1.35';
+      } else if (totalLen > 100) {
+        dom.canvasNoticeMessage.style.fontSize = '2.3rem';
+        dom.canvasNoticeMessage.style.lineHeight = '1.45';
+      } else {
+        dom.canvasNoticeMessage.style.fontSize = '2.7rem';
+        dom.canvasNoticeMessage.style.lineHeight = '1.5';
+      }
     }
   }
 
   /**
-   * Updates Event/Program details & Location
+   * Updates Event/Program Details & Location
    */
   function updateEventDetails() {
+    // 1. Program Name
     const progName = state.programName.trim();
     if (dom.canvasProgramBanner && dom.canvasProgramName) {
       if (progName) {
@@ -435,23 +406,14 @@
       }
     }
 
+    // 2. Parking Location
     const locName = state.location.trim();
     if (dom.canvasLocationBlock && dom.canvasLocationName) {
       if (locName) {
         dom.canvasLocationName.textContent = locName;
-        dom.canvasLocationBlock.style.display = 'flex';
+        dom.canvasLocationBlock.style.display = 'inline-flex';
       } else {
         dom.canvasLocationBlock.style.display = 'none';
-      }
-    }
-
-    const extra = state.additionalInfo.trim();
-    if (dom.canvasExtraBlock && dom.canvasExtraText) {
-      if (extra) {
-        dom.canvasExtraText.textContent = extra;
-        dom.canvasExtraBlock.style.display = 'flex';
-      } else {
-        dom.canvasExtraBlock.style.display = 'none';
       }
     }
   }
@@ -464,24 +426,7 @@
     updateVehicle();
     updateNoticeText();
     updateEventDetails();
-    updateTheme();
     calculateScale();
-  }
-
-  /**
-   * Visual theme switcher (Amber, Crimson, Royal)
-   */
-  function updateTheme() {
-    if (!dom.noticeCanvas) return;
-    dom.noticeCanvas.classList.remove('theme-amber', 'theme-crimson', 'theme-royal');
-    dom.noticeCanvas.classList.add('theme-' + state.theme);
-    dom.noticeCanvas.setAttribute('data-theme', state.theme);
-
-    // Sync theme buttons in sidebar
-    dom.themeButtons.forEach(btn => {
-      const active = btn.dataset.theme === state.theme;
-      btn.classList.toggle('active', active);
-    });
   }
 
   /* ==========================================================================
@@ -497,8 +442,8 @@
 
     // Viewport dimensions
     const viewportRect = dom.canvasViewport.getBoundingClientRect();
-    const paddingX = 40;
-    const paddingY = 40;
+    const paddingX = state.isFullscreen ? 0 : 36;
+    const paddingY = state.isFullscreen ? 0 : 36;
 
     const availableWidth = Math.max(100, viewportRect.width - paddingX);
     const availableHeight = Math.max(100, viewportRect.height - paddingY);
@@ -543,7 +488,7 @@
 
       showToast('Rendering high-resolution 1920×1080 image...', 'info');
 
-      // 1. Ensure all Gujarati & Web Fonts are fully loaded and active
+      // 1. Ensure all Gujarati & Web Fonts are fully loaded
       if (document.fonts && document.fonts.ready) {
         await document.fonts.ready;
       }
@@ -551,8 +496,8 @@
       // Small tick to ensure browser layout queue has settled
       await new Promise(resolve => setTimeout(resolve, 100));
 
-      // 2. Clone the noticeCanvas to an isolated offscreen container
-      // This is crucial: html2canvas is completely isolated from parent CSS scale transforms,
+      // 2. Clone noticeCanvas to an isolated offscreen container
+      // This is crucial: html2canvas is isolated from parent CSS scale transforms,
       // guaranteeing an exact 1920x1080 bitmap output without offset or blurriness!
       const targetCanvas = dom.noticeCanvas;
       const clone = targetCanvas.cloneNode(true);
@@ -590,7 +535,7 @@
         scale: 1, // 1:1 scale for exact 1920x1080 dimensions
         useCORS: true,
         allowTaint: true,
-        backgroundColor: '#0b0f19',
+        backgroundColor: '#F7F2E8',
         logging: false
       });
 
@@ -598,7 +543,7 @@
       document.body.removeChild(renderContainer);
 
       // 4. Generate download file
-      const plateNumber = (state.vehicleNumber.trim() || 'NOTICE').replace(/\s+/g, '-');
+      const plateNumber = (state.vehicleNumber.trim() || 'GJ01AB1234').replace(/\s+/g, '-');
       const filename = `parking-notice-${plateNumber}.png`;
 
       const dataUrl = canvas.toDataURL('image/png', 1.0);
@@ -611,7 +556,7 @@
       downloadLink.click();
       document.body.removeChild(downloadLink);
 
-      showToast(`Successfully downloaded: ${filename} (1920×1080)`, 'success');
+      showToast(`Successfully exported: ${filename} (1920×1080)`, 'success');
 
     } catch (err) {
       console.error('Download notice failed:', err);
@@ -683,10 +628,9 @@
     state.vehicleType = 'car';
     state.customVehicleName = '';
     state.vehicleNumber = 'GJ01AB1234';
-    state.programName = 'RAVI SABHA';
-    state.location = 'PARKING AREA';
-    state.additionalInfo = '';
-    state.theme = 'amber';
+    state.noticeTitle = 'વાહન સૂચના';
+    state.programName = 'SPIRITUAL PROGRAM';
+    state.location = 'MAIN PARKING AREA';
 
     // Sync HTML inputs
     dom.noticeRadios.forEach(radio => {
@@ -707,9 +651,9 @@
     if (dom.customVehicleInput) dom.customVehicleInput.value = '';
 
     if (dom.vehicleNumberInput) dom.vehicleNumberInput.value = state.vehicleNumber;
+    if (dom.noticeTitleInput) dom.noticeTitleInput.value = state.noticeTitle;
     if (dom.programNameInput) dom.programNameInput.value = state.programName;
     if (dom.locationInput) dom.locationInput.value = state.location;
-    if (dom.additionalInfoInput) dom.additionalInfoInput.value = '';
 
     updatePreview();
     showToast('Defaults restored successfully', 'success');
@@ -829,7 +773,14 @@
       });
     }
 
-    // 4. Program & Location Inputs
+    // 4. Notice Title, Program & Location Inputs
+    if (dom.noticeTitleInput) {
+      dom.noticeTitleInput.addEventListener('input', e => {
+        state.noticeTitle = e.target.value;
+        updateNoticeText();
+      });
+    }
+
     if (dom.programNameInput) {
       dom.programNameInput.addEventListener('input', e => {
         state.programName = e.target.value;
@@ -844,22 +795,7 @@
       });
     }
 
-    if (dom.additionalInfoInput) {
-      dom.additionalInfoInput.addEventListener('input', e => {
-        state.additionalInfo = e.target.value;
-        updateEventDetails();
-      });
-    }
-
-    // 5. Theme selection
-    dom.themeButtons.forEach(btn => {
-      btn.addEventListener('click', () => {
-        state.theme = btn.dataset.theme;
-        updateTheme();
-      });
-    });
-
-    // 6. Action buttons
+    // 5. Action buttons
     if (dom.downloadBtn) {
       dom.downloadBtn.addEventListener('click', downloadNotice);
     }
@@ -902,6 +838,7 @@
      ========================================================================== */
 
   function initApp() {
+    setupLogos();
     setupEventListeners();
     updatePreview();
 
@@ -911,7 +848,7 @@
       setTimeout(calculateScale, 150);
     });
 
-    console.log('Live Parking Notice Generator initialized successfully.');
+    console.log('Spiritual Program Parking Notice Generator initialized successfully.');
   }
 
   // DOM Content Ready bootstrap

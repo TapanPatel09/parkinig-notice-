@@ -4,53 +4,51 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Live Parking Notice Generator | લાઈવ પાર્કિંગ નોટિસ</title>
+  <title>Spiritual Program Parking Notice Generator | લાઈવ પાર્કિંગ નોટિસ</title>
   <meta name="description"
-    content="Live 16:9 Parking Notice Generator for Spiritual Programs and Live Events with instant Gujarati text preview and 1920x1080 download.">
+    content="Spiritual Program 16:9 Parking Notice Generator for Projectors and LED Screens with instant Gujarati live preview and exact 1920x1080 download.">
 
-  <!-- Google Fonts: Noto Sans Gujarati, Noto Serif Gujarati, Outfit, Cinzel -->
+  <!-- Google Fonts: Noto Serif Gujarati, Noto Sans Gujarati, Cinzel, Outfit -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
-    href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Noto+Sans+Gujarati:wght@400;500;600;700;800;900&family=Noto+Serif+Gujarati:wght@600;700;800&family=Outfit:wght@400;500;600;700;800;900&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Noto+Sans+Gujarati:wght@400;500;600;700;800;900&family=Noto+Serif+Gujarati:wght@500;600;700;800;900&family=Outfit:wght@400;500;600;700;800&display=swap"
     rel="stylesheet">
 
-  <!-- html2canvas CDN for client-side 1920x1080 PNG generation -->
+  <!-- html2canvas CDN for high-resolution 1920x1080 PNG generation -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
-  <!-- Custom Styles -->
+  <!-- Custom Stylesheet -->
   <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
-  <!-- Main Application Wrapper -->
   <div class="app-container" id="appRoot">
 
     <!-- TOP HEADER -->
     <header class="app-header">
       <div class="header-left">
-        <div class="logo-badge">
+        <div class="logo-badge" title="Spiritual Event Parking Notice">
           <svg class="logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="3" y="3" width="18" height="18" rx="4" />
-            <path d="M9 17V7h4a3 3 0 0 1 0 6H9" />
+            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
           </svg>
         </div>
         <div class="header-titles">
-          <h1 class="main-title">LIVE PARKING NOTICE GENERATOR</h1>
-          <p class="sub-title">લાઈવ પાર્કિંગ જાહેરાત નિર્માતા • Spiritual Event Projector & LED Display</p>
+          <h1 class="main-title">SPIRITUAL PARKING NOTICE GENERATOR</h1>
+          <p class="sub-title">સત્સંગ / ધાર્મિક કાર્યક્રમ વાહન સૂચના • 16:9 Projector & LED Display</p>
         </div>
       </div>
 
       <div class="header-center">
         <div class="live-indicator">
           <span class="pulse-dot"></span>
-          <span class="live-text">LIVE PREVIEW SYNC</span>
+          <span class="live-text">LIVE SYNC</span>
         </div>
         <div class="canvas-spec-badge">16:9 • 1920 × 1080</div>
       </div>
 
       <div class="header-actions">
-        <button type="button" class="btn btn-secondary" id="resetBtn" title="Restore Default Values">
+        <button type="button" class="btn btn-secondary" id="resetBtn" title="Reset All to Defaults">
           <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
             <path d="M3 3v5h5" />
@@ -58,14 +56,14 @@
           <span>Reset</span>
         </button>
 
-        <button type="button" class="btn btn-secondary" id="fullscreenBtn" title="Enter Fullscreen for Projector/LED">
+        <button type="button" class="btn btn-secondary" id="fullscreenBtn" title="Launch Fullscreen for Projector/LED">
           <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
           </svg>
           <span>Fullscreen</span>
         </button>
 
-        <button type="button" class="btn btn-primary" id="downloadBtn" title="Download High-Res 1920x1080 Image">
+        <button type="button" class="btn btn-primary" id="downloadBtn" title="Export 1920x1080 PNG Image">
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
             <polyline points="7 10 12 15 17 10" />
@@ -79,14 +77,14 @@
     <!-- MAIN TWO-COLUMN WORKSPACE -->
     <main class="main-workspace">
 
-      <!-- LEFT SIDE: CONTROL PANEL -->
+      <!-- LEFT SIDE: OPERATOR CONTROL PANEL -->
       <aside class="control-panel" id="controlPanel" aria-label="Notice Editor Controls">
         <div class="panel-header">
           <h2 class="panel-heading">
             <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
             </svg>
-            Notice Editor Controls
+            Operator Controls
           </h2>
           <span class="badge-hint">Instant Update</span>
         </div>
@@ -97,7 +95,7 @@
           <section class="form-section">
             <div class="section-title">
               <span class="section-num">1</span>
-              <h3>Notice Type / નોટિસ પ્રકાર</h3>
+              <h3>Notice Type / સૂચનાનો પ્રકાર</h3>
             </div>
 
             <div class="notice-type-grid" role="radiogroup" aria-label="Select Notice Type">
@@ -134,32 +132,32 @@
                 <div class="card-content">
                   <div class="card-title-row">
                     <span class="card-title">Custom Notice</span>
-                    <span class="gu-chip">કસ્ટમ નોટિસ</span>
+                    <span class="gu-chip">કસ્ટમ સંદેશ</span>
                   </div>
-                  <p class="card-desc">પોતાનો સંદેશ દાખલ કરો. (Type custom Gujarati/English text)</p>
+                  <p class="card-desc">કોઈપણ વિશેષ ગુજરાતી અથવા અંગ્રેજી સંદેશ દાખલ કરો.</p>
                 </div>
               </label>
             </div>
           </section>
 
-          <!-- SECTION 2: CUSTOM NOTICE TEXTAREA (Conditional / Expandable) -->
+          <!-- SECTION 2: CUSTOM MESSAGE TEXTAREA (Shown when Custom Notice is selected) -->
           <section class="form-section" id="customNoticeSection" style="display: none;">
             <div class="section-title">
               <span class="section-num">2</span>
-              <h3>Custom Message / કસ્ટમ સંદેશ</h3>
+              <h3>Custom Message / કસ્ટમ લખાણ</h3>
             </div>
             <div class="field-group">
               <div class="textarea-header">
-                <label for="customNoticeText" class="field-label">Custom Notice Text</label>
-                <button type="button" class="btn-token-insert" id="insertTokenBtn"
-                  title="Click to insert [VEHICLE NUMBER] placeholder">
-                  + Insert [VEHICLE NUMBER]
+                <label for="customNoticeText" class="field-label">Notice Message (Gujarati / English)</label>
+                <button type="button" class="btn-token-insert" id="insertTokenBtn" title="Insert vehicle number token">
+                  + [VEHICLE NUMBER]
                 </button>
               </div>
-              <textarea id="customNoticeText" rows="4" class="form-control gujarati-input"
-                placeholder="વાહન નંબર [VEHICLE NUMBER] કૃપા કરીને પાર્કિંગ સ્થળ પરથી દૂર કરવા વિનંતી.">વાહન નંબર [VEHICLE NUMBER] કૃપા કરીને પાર્કિંગ સ્થળ પરથી દૂર કરવા વિનંતી.</textarea>
+              <textarea id="customNoticeText" class="form-control" rows="4"
+                placeholder="વાહન નંબર [VEHICLE NUMBER] કૃપા કરીને પાર્કિંગ સ્થળ પરથી દૂર કરવા વિનંતી."></textarea>
               <div class="field-hint">
-                💡 Type <code>[VEHICLE NUMBER]</code> anywhere to automatically substitute the vehicle plate number.
+                <span class="hint-pill">PRO TIP</span>
+                <span>Type <code>[VEHICLE NUMBER]</code> anywhere to automatically inject the plate number.</span>
               </div>
             </div>
           </section>
@@ -167,7 +165,7 @@
           <!-- SECTION 3: VEHICLE TYPE -->
           <section class="form-section">
             <div class="section-title">
-              <span class="section-num" id="vehSecNum">3</span>
+              <span class="section-num">2</span>
               <h3>Vehicle Type / વાહન પ્રકાર</h3>
             </div>
 
@@ -177,9 +175,7 @@
                 <div class="veh-btn-icon">
                   <svg viewBox="0 0 64 64" fill="currentColor">
                     <path
-                      d="M12 40l4-16c1-4 4-7 8-7h16c4 0 7 3 8 7l4 16h6a3 3 0 0 1 3 3v5a2 2 0 0 1-2 2h-4a8 8 0 0 1-15.6 0H24.6a8 8 0 0 1-15.6 0H5a2 2 0 0 1-2-2v-5a3 3 0 0 1 3-3h6zm8-13l-3 11h30l-3-11a3 3 0 0 0-3-2H23a3 3 0 0 0-3 2z" />
-                    <circle cx="16.5" cy="48.5" r="4.5" />
-                    <circle cx="47.5" cy="48.5" r="4.5" />
+                      d="M52 24l-4.5-9a4 4 0 0 0-3.5-2H20a4 4 0 0 0-3.5 2L12 24a8 8 0 0 0-6 7.7V42a3 3 0 0 0 3 3h2.2a7 7 0 0 0 13.6 0h22.4a7 7 0 0 0 13.6 0H61a3 3 0 0 0 3-3v-10.3A8 8 0 0 0 52 24zm-32-7h24l3.5 7H16.5zm-4 28a4 4 0 1 1 4-4 4 4 0 0 1-4 4zm36 0a4 4 0 1 1 4-4 4 4 0 0 1-4 4z" />
                   </svg>
                 </div>
                 <span class="veh-btn-label">Car</span>
@@ -189,8 +185,12 @@
               <button type="button" class="veh-btn" data-type="bike" aria-pressed="false">
                 <div class="veh-btn-icon">
                   <svg viewBox="0 0 64 64" fill="currentColor">
-                    <path
-                      d="M50 36a9 9 0 1 0 9 9 9 9 0 0 0-9-9zm-36 0a9 9 0 1 0 9 9 9 9 0 0 0-9-9zm34.2-12l-7.7-1.4 3.5-7.6h4.5a2 2 0 1 0 0-4h-7a2 2 0 0 0-1.8 1.1L35 22.3 26 19a3 3 0 0 0-3.8 1.7L18.4 32h-4a2 2 0 0 0 0 4h5.2l3.4-9.8 9.5 3.5-5.5 11.3h-4a2 2 0 0 0 0 4h6a2 2 0 0 0 1.8-1.1L37 32.7l9.4 1.7A9 9 0 0 0 50 36v-4a9 9 0 0 0-1.8-8z" />
+                    <circle cx="16" cy="42" r="9" />
+                    <circle cx="48" cy="42" r="9" />
+                    <path d="M16 42l13-9 9 9h9l10-10M48 42l-5-14-7-6h-6" stroke="currentColor" stroke-width="4"
+                      stroke-linecap="round" stroke-linejoin="round" fill="none" />
+                    <path d="M42 22h-9l-11 8-12-7h8" stroke="currentColor" stroke-width="3" stroke-linecap="round"
+                      stroke-linejoin="round" fill="none" />
                   </svg>
                 </div>
                 <span class="veh-btn-label">Bike</span>
@@ -200,8 +200,11 @@
               <button type="button" class="veh-btn" data-type="scooter" aria-pressed="false">
                 <div class="veh-btn-icon">
                   <svg viewBox="0 0 64 64" fill="currentColor">
-                    <path
-                      d="M48 38a8 8 0 1 0 8 8 8 8 0 0 0-8-8zm-32 0a8 8 0 1 0 8 8 8 8 0 0 0-8-8zm33-14l-2.4-7.2h3.4a2 2 0 1 0 0-4h-5.8a2 2 0 0 0-1.9 1.4L39 25h-8a3 3 0 0 0-3 3v8h-7.6a8 8 0 0 0-6.4 3.2L11 40h5a2 2 0 0 1 0 4H9a2 2 0 0 1-2-2 8 8 0 0 1 8-8h14v-6a7 7 0 0 1 7-7h5.2l3.4-1.2A2 2 0 0 1 47 18l3.6 11H39a2 2 0 0 0 0 4h12a8 8 0 0 1 4 7.2A8 8 0 0 0 49 24z" />
+                    <circle cx="18" cy="46" r="7" />
+                    <circle cx="48" cy="46" r="7" />
+                    <path d="M12 42c0-8 6-12 16-12h8l6 14h10l4-12-8-12h-4" stroke="currentColor" stroke-width="3.5"
+                      stroke-linecap="round" stroke-linejoin="round" fill="none" />
+                    <path d="M48 20l5 12" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" />
                   </svg>
                 </div>
                 <span class="veh-btn-label">Scooter</span>
@@ -242,23 +245,6 @@
                 <span class="veh-btn-label">Truck</span>
               </button>
 
-              <!-- Tractor -->
-              <button type="button" class="veh-btn" data-type="tractor" aria-pressed="false">
-                <div class="veh-btn-icon">
-                  <svg viewBox="0 0 64 64" fill="currentColor">
-                    <path
-                      d="M18 32a12 12 0 1 0 12 12 12 12 0 0 0-12-12zm0 17a5 5 0 1 1 5-5 5 5 0 0 1-5 5z" />
-                    <path
-                      d="M48 42a7 7 0 1 0 7 7 7 7 0 0 0-7-7zm0 10a3 3 0 1 1 3-3 3 3 0 0 1-3 3z" />
-                    <path
-                      d="M6 44h4a8 8 0 0 1 16 0h4v-7h-3a2 2 0 0 1-2-2v-5h4v5h2l2-4h3l-2 4h17a3 3 0 0 1 3 3v9h-5a7 7 0 0 0-14 0H28v-3a10 10 0 0 0-8-9.8V28h-4v3.2A10 10 0 0 0 6 44z" />
-                    <rect x="42" y="18" width="3" height="16" rx="1" />
-                    <path d="M41 18h5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
-                  </svg>
-                </div>
-                <span class="veh-btn-label">Tractor</span>
-              </button>
-
               <!-- Other -->
               <button type="button" class="veh-btn" data-type="other" aria-pressed="false">
                 <div class="veh-btn-icon">
@@ -274,16 +260,16 @@
 
             <!-- Custom Vehicle Type Input (shown when 'Other' is chosen) -->
             <div class="custom-vehicle-wrap" id="customVehicleWrapper" style="display: none;">
-              <label for="customVehicleInput" class="field-label">Custom Vehicle Name / વાહન નામ</label>
+              <label for="customVehicleInput" class="field-label">Enter Vehicle Type / વાહન પ્રકાર</label>
               <input type="text" id="customVehicleInput" class="form-control"
-                placeholder="e.g. Van, Tempo, JCB, Luxury Bus, E-Rickshaw" value="">
+                placeholder="e.g. Tractor, Tempo, JCB, E-Rickshaw" value="">
             </div>
           </section>
 
           <!-- SECTION 4: VEHICLE NUMBER -->
           <section class="form-section">
             <div class="section-title">
-              <span class="section-num" id="regSecNum">4</span>
+              <span class="section-num">3</span>
               <h3>Vehicle Number / વાહન નંબર</h3>
             </div>
 
@@ -295,11 +281,11 @@
               </div>
               <div class="field-hint">
                 <span class="hint-pill">AUTO UPPERCASE</span>
-                <span class="hint-text">Formats automatically (e.g. GJ 01 AB 1234 or GJ01AB1234)</span>
+                <span class="hint-text">Automatically converted to uppercase without extra spaces</span>
               </div>
             </div>
 
-            <!-- Mini Plate Preview inside sidebar for instant visual feedback -->
+            <!-- Mini Plate Preview in Sidebar -->
             <div class="sidebar-mini-plate-wrapper">
               <span class="mini-plate-label">Plate Preview:</span>
               <div class="mini-plate" id="miniPlateDisplay">
@@ -312,53 +298,29 @@
             </div>
           </section>
 
-          <!-- SECTION 5: EVENT & VENUE INFORMATION -->
+          <!-- SECTION 5: NOTICE TITLE & PROGRAM / VENUE DETAILS -->
           <section class="form-section">
             <div class="section-title">
-              <span class="section-num">5</span>
-              <h3>Program / Event Details (વ્યવસ્થા માહિતી)</h3>
+              <span class="section-num">4</span>
+              <h3>Notice Title & Event Details</h3>
             </div>
 
             <div class="field-group">
-              <label for="programNameInput" class="field-label">Program / Event Name (કાર્યક્રમનું નામ)</label>
+              <label for="noticeTitleInput" class="field-label">Notice Title (મુખ્ય શીર્ષક)</label>
+              <input type="text" id="noticeTitleInput" class="form-control"
+                placeholder="વાહન સૂચના" value="વાહન સૂચના">
+            </div>
+
+            <div class="field-group">
+              <label for="programNameInput" class="field-label">Program Name (કાર્યક્રમનું નામ - Optional)</label>
               <input type="text" id="programNameInput" class="form-control"
-                placeholder="SPIRITUAL PROGRAM / સત્સંગ સમારોહ" value="SPIRITUAL PROGRAM">
+                placeholder="e.g. SPIRITUAL PROGRAM / સત્સંગ સમારોહ" value="SPIRITUAL PROGRAM">
             </div>
 
             <div class="field-group">
-              <label for="locationInput" class="field-label">Location / Parking Zone (સ્થળ / પાર્કિંગ ઝોન)</label>
+              <label for="locationInput" class="field-label">Location / Parking Zone (સ્થળ - Optional)</label>
               <input type="text" id="locationInput" class="form-control"
-                placeholder="MAIN PARKING AREA / મુખ્ય પાર્કિંગ સ્થળ" value="MAIN PARKING AREA">
-            </div>
-
-            <div class="field-group">
-              <label for="additionalInfoInput" class="field-label">Additional Note / Helpdesk Contact (વધારાની નોંધ -
-                Optional)</label>
-              <input type="text" id="additionalInfoInput" class="form-control"
-                placeholder="e.g. Emergency Contact: 98765-XXXXX / Gate No. 2" value="">
-            </div>
-          </section>
-
-          <!-- SECTION 6: THEME & VISUAL TONE -->
-          <section class="form-section">
-            <div class="section-title">
-              <span class="section-num">6</span>
-              <h3>Visual Theme / રંગ સંગત</h3>
-            </div>
-            <div class="theme-selector-grid">
-              <button type="button" class="theme-btn active" data-theme="amber"
-                title="Auspicious Spiritual Gold / Amber">
-                <span class="theme-dot dot-amber"></span>
-                <span>Divine Amber</span>
-              </button>
-              <button type="button" class="theme-btn" data-theme="crimson" title="Urgent Crimson Notice">
-                <span class="theme-dot dot-crimson"></span>
-                <span>Urgent Red</span>
-              </button>
-              <button type="button" class="theme-btn" data-theme="royal" title="Spiritual Deep Indigo">
-                <span class="theme-dot dot-royal"></span>
-                <span>Deep Indigo</span>
-              </button>
+                placeholder="e.g. MAIN PARKING AREA / મુખ્ય પાર્કિંગ સ્થળ" value="MAIN PARKING AREA">
             </div>
           </section>
 
@@ -367,189 +329,178 @@
 
       <!-- RIGHT SIDE: LIVE 16:9 PREVIEW STAGE -->
       <section class="preview-stage" aria-label="16:9 Live Notice Canvas Viewport">
-
+        
         <!-- Viewport Toolbar -->
         <div class="stage-toolbar">
           <div class="toolbar-info">
-            <span class="stage-tag">STAGE CANVAS</span>
-            <span class="stage-meta" id="resolutionTag">1920 × 1080 (16:9 Ultra-HD)</span>
+            <span class="stage-tag">LIVE STAGE</span>
+            <span class="stage-meta" id="resolutionTag">1920 × 1080 (16:9 Presentation Screen)</span>
           </div>
 
           <div class="toolbar-controls">
             <span class="zoom-text" id="zoomPercentText">Fit to Screen</span>
             <button type="button" class="toolbar-btn" id="projectorPreviewBtn" title="Launch Fullscreen Projector Mode">
               <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
-                <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+                <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
               </svg>
-              <span>Projector Mode</span>
+              <span>Projector Fullscreen</span>
             </button>
           </div>
         </div>
 
-        <!-- Scaling Wrapper that fits available screen and holds true 1920x1080 canvas -->
+        <!-- Scaling Wrapper that fits available screen while holding the true 1920x1080 canvas -->
         <div class="canvas-viewport" id="canvasViewport">
           <div class="canvas-scaler" id="canvasScaler">
 
-            <!-- THE NATIVE 1920 x 1080 CANVAS ELEMENT -->
-            <article class="notice-canvas theme-amber" id="noticeCanvas" data-theme="amber"
-              aria-label="Generated Live Notice">
-              <!-- Background Ambient Ornaments & Spiritual Watermark -->
-              <div class="canvas-bg-layer">
-                <div class="ambient-glow"></div>
-                <div class="spiritual-mandala-watermark">
-                  <svg viewBox="0 0 500 500" fill="none" opacity="0.04">
-                    <circle cx="250" cy="250" r="230" stroke="currentColor" stroke-width="3" stroke-dasharray="8 8" />
-                    <circle cx="250" cy="250" r="180" stroke="currentColor" stroke-width="2" />
-                    <circle cx="250" cy="250" r="130" stroke="currentColor" stroke-width="2" stroke-dasharray="4 4" />
-                    <circle cx="250" cy="250" r="70" stroke="currentColor" stroke-width="2" />
-                    <!-- Symmetrical Rays -->
-                    <g stroke="currentColor" stroke-width="1.5">
-                      <line x1="250" y1="20" x2="250" y2="480" />
-                      <line x1="20" y1="250" x2="480" y2="250" />
-                      <line x1="87" y1="87" x2="413" y2="413" />
-                      <line x1="87" y1="413" x2="413" y2="87" />
-                    </g>
+            <!-- ================================================================
+                 THE DEDICATED 1920 × 1080 NOTICE CANVAS
+                 Matches the hand-drawn structural layout:
+                 - Warm cream/off-white background (#F7F2E8)
+                 - Outer rectangular brown border with rounded corners
+                 - Inner decorative ornamental brown border
+                 - Top-Left Logo and Top-Right Logo
+                 - Central Title, Vehicle Visual, Number Plate, Gujarati Message
+                 - Balanced empty space, formal spiritual aesthetic
+                 ================================================================ -->
+            <article class="notice-canvas" id="noticeCanvas" aria-label="Spiritual Program Parking Notice Screen">
+
+              <!-- Ambient Subtle Spiritual Watermark in Center Background -->
+              <div class="canvas-watermark" aria-hidden="true">
+                <svg viewBox="0 0 600 600" fill="none" opacity="0.045">
+                  <circle cx="300" cy="300" r="280" stroke="#7A4B2A" stroke-width="2.5" stroke-dasharray="6 6" />
+                  <circle cx="300" cy="300" r="230" stroke="#7A4B2A" stroke-width="1.5" />
+                  <circle cx="300" cy="300" r="170" stroke="#7A4B2A" stroke-width="2" stroke-dasharray="8 6" />
+                  <circle cx="300" cy="300" r="110" stroke="#7A4B2A" stroke-width="1.5" />
+                  <!-- 16-fold Symmetrical Spiritual Mandala Petals -->
+                  <g stroke="#7A4B2A" stroke-width="1.5">
+                    <line x1="300" y1="20" x2="300" y2="580" />
+                    <line x1="20" y1="300" x2="580" y2="300" />
+                    <line x1="102" y1="102" x2="498" y2="498" />
+                    <line x1="102" y1="498" x2="498" y2="102" />
+                    <line x1="193" y1="41" x2="407" y2="559" />
+                    <line x1="41" y1="193" x2="559" y2="407" />
+                    <line x1="41" y1="407" x2="559" y2="193" />
+                    <line x1="193" y1="559" x2="407" y2="41" />
+                  </g>
+                </svg>
+              </div>
+
+              <!-- 1. LARGE OUTER RECTANGULAR BROWN BORDER -->
+              <div class="outer-border-frame"></div>
+
+              <!-- 2. INNER ORNAMENTAL DECORATIVE BORDER (With Corner Flourishes) -->
+              <div class="inner-border-frame">
+                <!-- Corner Flourishes (Top-Left, Top-Right, Bottom-Left, Bottom-Right) -->
+                <div class="ornament-corner ornament-tl">
+                  <svg viewBox="0 0 60 60" fill="currentColor">
+                    <path d="M4 4h36v3H7v33H4V4zm8 8h24v2h-22v22h-2V12zm6 6h14v2H20v14h-2V18z" />
+                    <circle cx="28" cy="28" r="3" />
+                  </svg>
+                </div>
+                <div class="ornament-corner ornament-tr">
+                  <svg viewBox="0 0 60 60" fill="currentColor">
+                    <path d="M56 4H20v3h33v33h3V4zm-8 8H24v2h22v22h2V12zm-6 6H28v2h14v14h2V18z" />
+                    <circle cx="32" cy="28" r="3" />
+                  </svg>
+                </div>
+                <div class="ornament-corner ornament-bl">
+                  <svg viewBox="0 0 60 60" fill="currentColor">
+                    <path d="M4 56h36v-3H7V20H4v36zm8-8h24v-2h-22V22h-2v24zm6-6h14v-2H20V26h-2v14z" />
+                    <circle cx="28" cy="32" r="3" />
+                  </svg>
+                </div>
+                <div class="ornament-corner ornament-br">
+                  <svg viewBox="0 0 60 60" fill="currentColor">
+                    <path d="M56 56H20v-3h33V20h3v36zm-8-8H24v-2h22V22h2v24zm-6-6H28v-2h14V26h2v14z" />
+                    <circle cx="32" cy="32" r="3" />
                   </svg>
                 </div>
               </div>
 
-              <!-- Outer Ornamental Border with Corners -->
-              <div class="canvas-border-frame">
-                <div class="frame-corner corner-tl">
-                  <svg viewBox="0 0 60 60" fill="currentColor">
-                    <path d="M4 4h30v4H8v26H4V4zm8 8h16v4h-12v12h-4V12z" />
-                  </svg>
+              <!-- 3. TOP-LEFT LOGO CONTAINER -->
+              <!-- ======================================================
+                    MANUALLY CHANGE THIS LOGO PATH IN CODE IF DESIRED
+                    ====================================================== -->
+              <!-- <div class="logo-wrapper logo-left-wrapper" title="Top-Left Logo">
+                <img id="leftLogo" class="logo-left" src="assets/baps_logo.png" alt="Organization Logo Left" onerror="this.style.opacity='0.4'">
+              </div> -->
+
+              <!-- 4. TOP-RIGHT LOGO CONTAINER -->
+              <!-- ======================================================
+                    MANUALLY CHANGE THIS LOGO PATH IN CODE IF DESIRED
+                    ====================================================== -->
+              <!-- <div class="logo-wrapper logo-right-wrapper" title="Top-Right Logo">
+                <img id="rightLogo" class="logo-right" src="assets/logo-right.png" alt="Organization Logo Right"
+                  onerror="this.style.opacity='0.4'">
+              </div> -->
+
+              <!-- 5. MAIN NOTICE CONTENT (VERTICALLY & HORIZONTALLY BALANCED) -->
+              <div class="notice-inner-content">
+
+                <!-- Program Name Banner (Top / Center - Optional, hidden if empty) -->
+                <!-- <div class="program-header-banner" id="canvasProgramBanner">
+                  <span class="spiritual-flourish">✤</span>
+                  <span class="program-name-text" id="canvasProgramName">SPIRITUAL PROGRAM</span>
+                  <span class="spiritual-flourish">✤</span>
+                </div> -->
+
+                <!-- Notice Heading / Title (Default: વાહન સૂચના) -->
+                <div class="notice-title-wrapper">
+                  <div class="title-line-flourish left-line"></div>
+                  <h2 class="notice-main-title" id="canvasNoticeTitle">વાહન સૂચના</h2>
+                  <div class="title-line-flourish right-line"></div>
                 </div>
-                <div class="frame-corner corner-tr">
-                  <svg viewBox="0 0 60 60" fill="currentColor">
-                    <path d="M56 4H26v4h26v26h4V4zm-8 8H32v4h12v12h4V12z" />
-                  </svg>
+
+                <!-- Vehicle Illustration & Type Badge -->
+                <!-- <div class="vehicle-center-block">
+                  <div class="vehicle-svg-container" id="canvasVehicleIconWrapper">
+                    <!-- Dynamic Crisp Vector Illustration rendered by JavaScript -->
+                  <!-- </div> -->
+                  <!-- <div class="vehicle-type-label" id="canvasVehicleTypeBadge"> -->
+                    <!-- <span class="veh-label-text" id="canvasVehicleTypeText">CAR</span> -->
+                  <!-- </div> -->
+                <!-- </div> -->
+
+                <!-- REALISTIC INDIAN VEHICLE NUMBER PLATE (HSRP SPECIFICATION) -->
+                <div class="plate-centerpiece-wrapper">
+                  <div class="indian-hsrp-plate" id="canvasPlate">
+                    <!-- Left Blue IND Band with Ashoka Chakra -->
+                    <div class="hsrp-ind-strip">
+                      <!-- <div class="hsrp-ashoka-chakra" title="Ashoka Chakra"></div> -->
+                      <div class="hsrp-ind-code">IND</div>
+                    </div>
+
+                    <!-- Center Plate Registration Number -->
+                    <div class="hsrp-number-text" id="canvasPlateNumber">
+                      GJ01AB1234
+                    </div>
+
+                    <!-- Corner Fastener Screws / Rivets -->
+                    <span class="plate-rivet rivet-tl"></span>
+                    <span class="plate-rivet rivet-tr"></span>
+                    <span class="plate-rivet rivet-bl"></span>
+                    <span class="plate-rivet rivet-br"></span>
+                  </div>
                 </div>
-                <div class="frame-corner corner-bl">
-                  <svg viewBox="0 0 60 60" fill="currentColor">
-                    <path d="M4 56h30v-4H8V26H4v30zm8-8h16v-4h-12V32h-4v16z" />
-                  </svg>
+
+                <!-- GUJARATI NOTICE MESSAGE (HIGH READABILITY & DYNAMIC SIZING) -->
+                <div class="notice-message-box">
+                  <p class="notice-message-text" id="canvasNoticeMessage">
+                    વાહન નંબર <span class="plate-highlight-token" id="messagePlateToken">GJ01AB1234</span> યોગ્ય જગ્યાએ પાર્ક કરેલ નથી. કૃપા કરીને તેને યોગ્ય જગ્યાએ પાર્ક કરવા વિનંતી.
+                  </p>
                 </div>
-                <div class="frame-corner corner-br">
-                  <svg viewBox="0 0 60 60" fill="currentColor">
-                    <path d="M56 56H26v-4h26V26h4v30zm-8-8H32v-4h12V32h4v16z" />
-                  </svg>
-                </div>
-              </div>
 
-              <!-- MAIN NOTICE CONTENT LAYOUT -->
-              <div class="notice-inner-grid">
-
-                <!-- 1. NOTICE HEADER SECTION -->
-                <header class="notice-header-bar">
-                  <!-- Program Pill / Title -->
-                  <!-- <div class="program-banner" id="canvasProgramBanner">
-                    <span class="program-accent-leaf">✤</span>
-                    <span class="program-text" id="canvasProgramName">RAVI SABHA</span>
-                    <span class="program-accent-leaf">✤</span>
-                  </div> -->
-
-                  <!-- Alert Header Badge -->
-                  <div class="alert-status-badge">
-                    <span class="alert-icon-wrap">
-                      <svg viewBox="0 0 24 24" width="32" height="32" fill="currentColor">
-                        <path d="M12 2L1 21h22L12 2zm0 3.8L19.5 19h-15L12 5.8zM11 10v4h2v-4h-2zm0 6v2h2v-2h-2z" />
-                      </svg>
-                    </span>
-                    <div class="alert-badge-texts">
-                      <span class="badge-title-gu" id="canvasNoticeTitleGu">તાત્કાલિક પાર્કિંગ સૂચના</span>
-                      <span class="badge-title-en" id="canvasNoticeTitleEn">URGENT PARKING NOTICE</span>
-                    </div>
-                  </div>
-                </header>
-
-                <!-- 2. VEHICLE DISPLAY & NUMBER PLATE CENTERPIECE -->
-                <section class="notice-vehicle-block">
-
-                  <!-- Vehicle Illustration & Type Tag -->
-                  <div class="vehicle-visual-row">
-                    <div class="vehicle-art-wrapper" id="canvasVehicleIconWrapper">
-                      <!-- Dynamic Inline SVG loaded by JS -->
-                    </div>
-                    <div class="vehicle-type-pill" id="canvasVehicleTypeBadge">
-                      <span class="veh-pill-dot">●</span>
-                      <span class="veh-pill-text" id="canvasVehicleTypeText">CAR / કાર</span>
-                    </div>
-                  </div>
-
-                  <!-- REALISTIC HIGH-CONTRAST INDIAN NUMBER PLATE -->
-                  <div class="holographic-plate-frame">
-                    <div class="indian-number-plate" id="canvasPlate">
-                      <!-- Left Blue IND Strip with Chakra -->
-                      <div class="ind-strip">
-                        <!-- <div class="ind-hologram" title="Security Hologram"></div> -->
-                        <div class="ashoka-chakra-symbol" title="Ashoka Chakra"></div>
-                        <div class="ind-country-code">IND</div>
-                      </div>
-
-                      <!-- Center Registration Number -->
-                      <div class="plate-number-display" id="canvasPlateNumber">
-                        GJ01AB1234
-                      </div>
-
-                      <!-- Decorative Plate Bolts / Screws -->
-                      <div class="plate-bolt bolt-top-left"></div>
-                      <div class="plate-bolt bolt-top-right"></div>
-                      <div class="plate-bolt bolt-bottom-left"></div>
-                      <div class="plate-bolt bolt-bottom-right"></div>
-                    </div>
-                  </div>
-
-                </section>
-
-                <!-- 3. NOTICE MESSAGE TEXT (Primary Gujarati High-Contrast Display) -->
-                <section class="notice-message-container">
-                  <div class="message-card-inner">
-                    <div class="message-ornament top-ornament">✦ ✧ ✦</div>
-                    <p class="gujarati-primary-message" id="canvasNoticeMessage">
-                      વાહન નંબર <span class="message-plate-highlight" id="messagePlateToken">GJ01AB1234</span> યોગ્ય
-                      જગ્યાએ પાર્ક કરેલ નથી. કૃપા કરીને તેને યોગ્ય જગ્યાએ પાર્ક કરવા વિનંતી.
-                    </p>
-                    <div class="message-ornament bottom-ornament">✦ ✧ ✦</div>
-                  </div>
-                </section>
-
-                <!-- 4. LOCATION, VENUE & COOPERATION FOOTER -->
-                <footer class="notice-footer-bar">
-                  <!-- Venue / Parking Location -->
-                  <div class="footer-location-block" id="canvasLocationBlock">
-                    <div class="footer-icon-circle">
-                      <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor">
-                        <path
-                          d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
-                      </svg>
-                    </div>
-                    <div class="location-details">
-                      <span class="location-label">PARKING LOCATION / પાર્કિંગ સ્થળ</span>
-                      <span class="location-value" id="canvasLocationName">MAIN PARKING AREA</span>
-                    </div>
-                  </div>
-
-                  <!-- Optional Additional Info / Contact -->
-                  <div class="footer-extra-block" id="canvasExtraBlock" style="display: none;">
-                    <div class="footer-icon-circle extra-icon">
-                      <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
-                        <path
-                          d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z" />
-                      </svg>
-                    </div>
-                    <span class="extra-text" id="canvasExtraText"></span>
-                  </div>
-
-                  <!-- Respectful Spiritual Footer Note -->
-                  <!-- <div class="footer-cooperation-block">
-                    <span class="spiritual-namaste">🙏</span>
-                    <span class="cooperation-text-gu">કૃપા કરીને સ્વયંસેવકોને સહકાર આપવા નમ્ર વિનંતી</span>
-                    <span class="cooperation-divider">•</span>
-                    <span class="cooperation-text-en">Thank you for your kind cooperation</span>
-                  </div>
-                </footer> -->
+                <!-- LOCATION & COOPERATION FOOTER (Optional, hidden if empty) -->
+                <!-- <div class="notice-footer-area"> -->
+                  <!-- <div class="location-badge" id="canvasLocationBlock"> -->
+                    <!-- <svg class="location-pin-icon" viewBox="0 0 24 24" fill="currentColor"> -->
+                      <!-- <path -->
+                        <!-- d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" /> -->
+                    <!-- </svg> -->
+                    <!-- <span class="location-label">સ્થળ / PARKING LOCATION:</span> -->
+                    <!-- <span class="location-value" id="canvasLocationName">MAIN PARKING AREA</span> -->
+                  <!-- </div> -->
+                <!-- </div> -->
 
               </div>
             </article>
@@ -557,7 +508,7 @@
           </div>
         </div>
 
-        <!-- Floating Fullscreen Exit Bar (Only visible in Fullscreen) -->
+        <!-- Floating Fullscreen Exit Bar (Only visible in Fullscreen Mode) -->
         <div class="fullscreen-exit-bar" id="fullscreenExitBar">
           <span class="fs-info-pill">PROJECTOR / LED BROADCAST MODE (16:9)</span>
           <button type="button" class="btn btn-dark" id="exitFullscreenBtn">
@@ -577,7 +528,7 @@
 
   </div>
 
-  <!-- Main JavaScript Logic -->
+  <!-- Main JavaScript Application Logic -->
   <script src="script.js"></script>
 </body>
 
