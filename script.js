@@ -179,6 +179,7 @@
     noticeTitle: 'વાહન સૂચના',
     programName: 'SPIRITUAL PROGRAM',
     location: 'MAIN PARKING AREA',
+    messageFontSize: 2.7,
     isFullscreen: false
   };
 
@@ -222,6 +223,8 @@
     noticeTitleInput: document.getElementById('noticeTitleInput'),
     programNameInput: document.getElementById('programNameInput'),
     locationInput: document.getElementById('locationInput'),
+    messageFontSizeInput: document.getElementById('messageFontSizeInput'),
+    messageFontSizeValue: document.getElementById('messageFontSizeValue'),
 
     // Action buttons
     downloadBtn: document.getElementById('downloadBtn'),
@@ -387,6 +390,11 @@
       } else {
         dom.canvasNoticeMessage.style.fontSize = '2.7rem';
         dom.canvasNoticeMessage.style.lineHeight = '1.5';
+      }
+
+      dom.canvasNoticeMessage.style.fontSize = `${state.messageFontSize}rem`;
+      if (dom.messageFontSizeValue) {
+        dom.messageFontSizeValue.textContent = `${state.messageFontSize.toFixed(1)}rem`;
       }
     }
   }
@@ -631,6 +639,7 @@
     state.noticeTitle = 'વાહન સૂચના';
     state.programName = 'SPIRITUAL PROGRAM';
     state.location = 'MAIN PARKING AREA';
+    state.messageFontSize = 2.7;
 
     // Sync HTML inputs
     dom.noticeRadios.forEach(radio => {
@@ -654,6 +663,7 @@
     if (dom.noticeTitleInput) dom.noticeTitleInput.value = state.noticeTitle;
     if (dom.programNameInput) dom.programNameInput.value = state.programName;
     if (dom.locationInput) dom.locationInput.value = state.location;
+    if (dom.messageFontSizeInput) dom.messageFontSizeInput.value = state.messageFontSize;
 
     updatePreview();
     showToast('Defaults restored successfully', 'success');
@@ -792,6 +802,13 @@
       dom.locationInput.addEventListener('input', e => {
         state.location = e.target.value;
         updateEventDetails();
+      });
+    }
+
+    if (dom.messageFontSizeInput) {
+      dom.messageFontSizeInput.addEventListener('input', e => {
+        state.messageFontSize = Number(e.target.value);
+        updateNoticeText();
       });
     }
 
