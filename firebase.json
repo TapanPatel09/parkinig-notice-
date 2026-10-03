@@ -4,9 +4,23 @@
     "ignore": [
       "firebase.json",
       "**/.*",
-      "**/node_modules/**"
+      "**/node_modules/**",
+      "**/*.bat",
+      "**/*.cmd",
+      "**/*.exe",
+      "**/*.sh",
+      "start-server.bat",
+      "server.js",
+      "package.json",
+      "package-lock.json",
+      "latest-notice.*",
+      "y/**"
     ],
     "rewrites": [
+      {
+        "source": "/obs",
+        "destination": "/obs.html"
+      },
       {
         "source": "**",
         "destination": "/index.html"
