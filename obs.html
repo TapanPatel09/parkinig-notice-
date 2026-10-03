@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1920, height=1080, initial-scale=1.0">
+  <title>OBS Live Display - Spiritual Parking Notice</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      width: 1920px;
+      height: 1080px;
+      overflow: hidden;
+      background: transparent !important;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    /* 1920x1080 Stage Viewport */
+    .obs-viewport {
+      position: relative;
+      width: 1920px;
+      height: 1080px;
+      overflow: hidden;
+    }
+
+    /* Dual-layer image display for broadcast-grade flickerless cross-fading */
+    .notice-layer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 1920px;
+      height: 1080px;
+      object-fit: contain;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.22s ease-in-out;
+      will-change: opacity;
+    }
+
+    .notice-layer.active {
+      opacity: 1;
+      z-index: 2;
+    }
+
+    .notice-layer.fading {
+      opacity: 0;
+      z-index: 1;
+    }
+
+    /* Optional test/debug badge (visible only when url has ?debug=1) */
+    .debug-badge {
+      display: none;
+      position: absolute;
+      bottom: 16px;
+      right: 16px;
+      padding: 6px 12px;
+      border-radius: 6px;
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #38bdf8;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      z-index: 99;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    }
+
+    .debug-badge.connected {
+      color: #4ade80;
+    }
+
+    .debug-badge.disconnected {
+      color: #f87171;
+    }
+  </style>
+</head>
+<body>
+
+  <main class="obs-viewport" id="obsViewport">
+    <!-- Two image layers for flicker-free cross-fade transitions on live broadcast -->
+    <img id="layerA" class="notice-layer" alt="Parking Notice Display A" />
+    <img id="layerB" class="notice-layer" alt="Parking Notice Display B" />
+
+    <!-- Debug/Testing Status Indicator (Hidden on broadcast unless ?debug=1 is in URL) -->
+    <div id="debugBadge" class="debug-badge">OBS Disconnected</div>
+  </main>
+
+  <script>
+    (function () {
+      'use strict';
+
+      const layerA = document.getElementById('layerA');
+      const layerB = document.getElementById('layerB');
+      const debugBadge = document.getElementById('debugBadge');
+
+      let activeLayer = null; // 'A' or 'B'
+      let currentTimestamp = 0;
+      let sseConnection = null;
+
+      // Show debug badge if '?debug=1' is in query string
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.has('debug')) {
+        debugBadge.style.display = 'block';
+      }
+
+      function updateStatus(text, statusClass) {
+        if (debugBadge) {
+          debugBadge.textContent = text;
+          debugBadge.className = 'debug-badge ' + (statusClass || '');
+          if (urlParams.has('debug')) debugBadge.style.display = 'block';
+        }
+      }
+
+      /**
+       * Smoothly transitions to the new notice image without flashing or blank frames
+       */
+      function showNotice(imageData, timestamp) {
+        if (!imageData) return;
+        if (timestamp && timestamp === currentTimestamp && activeLayer !== null) {
+          return; // Already showing this exact version
+        }
+        currentTimestamp = timestamp || Date.now();
+
+        // Determine next layer to cross-fade into
+        const targetLayer = (activeLayer === 'A') ? layerB : layerA;
+        const previousLayer = (activeLayer === 'A') ? layerA : layerB;
+
+        // Preload image on target layer
+        const tempImg = new Image();
+        tempImg.onload = function () {
+          targetLayer.src = imageData;
+          targetLayer.classList.add('active');
+          targetLayer.classList.remove('fading');
+
+          if (previousLayer && activeLayer !== null) {
+            previousLayer.classList.remove('active');
+            previousLayer.classList.add('fading');
+          }
+
+          activeLayer = (targetLayer === layerA) ? 'A' : 'B';
+          updateStatus('Notice Live (' + new Date(currentTimestamp).toLocaleTimeString() + ')', 'connected');
+        };
+        tempImg.src = imageData;
+      }
+
+      /**
+       * Clear notice from OBS display
+       */
+      function clearNotice() {
+        if (layerA) {
+          layerA.classList.remove('active');
+          layerA.classList.add('fading');
+        }
+        if (layerB) {
+          layerB.classList.remove('active');
+          layerB.classList.add('fading');
+        }
+        activeLayer = null;
+        updateStatus('Notice Cleared', 'connected');
+      }
+
+      /**
+       * Initial fetch to immediately populate notice if OBS was opened after send
+       */
+      async function fetchLatestNotice() {
+        try {
+          const res = await fetch('/api/latest-notice', { cache: 'no-store' });
+          if (res.ok) {
+            const data = await res.json();
+            if (data && data.visible && data.imageData) {
+              showNotice(data.imageData, data.timestamp);
+            }
+          }
+        } catch (err) {
+          console.warn('[OBS Browser] Could not fetch initial notice:', err);
+        }
+      }
+
+      /**
+       * Real-time Server-Sent Events (SSE) listener
+       */
+      function connectSSE() {
+        if (sseConnection) {
+          sseConnection.close();
+        }
+
+        try {
+          sseConnection = new EventSource('/api/obs-events');
+
+          sseConnection.addEventListener('connected', function (e) {
+            console.log('[OBS Browser] Connected to SSE stream.');
+            updateStatus('OBS Connected (Ready)', 'connected');
+          });
+
+          sseConnection.addEventListener('update', function (e) {
+            try {
+              const data = JSON.parse(e.data);
+              if (data.visible && data.imageData) {
+                showNotice(data.imageData, data.timestamp);
+              } else if (!data.visible) {
+                clearNotice();
+              }
+            } catch (err) {
+              console.error('[OBS Browser] Error parsing update event:', err);
+            }
+          });
+
+          sseConnection.addEventListener('clear', function () {
+            clearNotice();
+          });
+
+          sseConnection.onerror = function (err) {
+            console.warn('[OBS Browser] SSE connection lost. Will reconnect automatically...', err);
+            updateStatus('Reconnecting...', 'disconnected');
+          };
+
+        } catch (err) {
+          console.error('[OBS Browser] SSE init error:', err);
+          updateStatus('Connection Error', 'disconnected');
+        }
+      }
+
+      // 1. Initial fetch & SSE connection
+      fetchLatestNotice();
+      connectSSE();
+
+      // 2. High-reliability fallback polling (checks every 3 seconds in case SSE drops)
+      setInterval(async function () {
+        try {
+          const res = await fetch('/api/status', { cache: 'no-store' });
+          if (res.ok) {
+            const status = await res.json();
+            if (status.hasActiveNotice && status.lastUpdated !== currentTimestamp) {
+              fetchLatestNotice();
+            }
+          }
+        } catch (e) {
+          // Server might be temporarily reloading, continue gracefully
+        }
+      }, 3000);
+
+    })();
+  </script>
+</body>
+</html>

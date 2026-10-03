@@ -1,0 +1,18 @@
+{
+  "name": "spiritual-parking-notice-obs",
+  "version": "2.0.0",
+  "description": "Spiritual Program 16:9 Parking Notice Generator with Automated OBS Studio Integration",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": [
+    "obs",
+    "browser-source",
+    "parking-notice",
+    "spiritual-program",
+    "1080p"
+  ],
+  "author": "",
+  "license": "ISC"
+}

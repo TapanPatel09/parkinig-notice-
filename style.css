@@ -253,6 +253,52 @@ html, body {
   border-color: rgba(255, 255, 255, 0.4);
 }
 
+/* OBS Broadcast Action Buttons */
+.btn-obs {
+  background: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%);
+  color: #ffffff;
+  border-color: #6366f1;
+  box-shadow: 0 4px 14px rgba(79, 70, 229, 0.35);
+  position: relative;
+  letter-spacing: 0.3px;
+}
+
+.btn-obs:hover {
+  background: linear-gradient(135deg, #6366f1 0%, #4338ca 100%);
+  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.55);
+  transform: translateY(-1px);
+}
+
+.btn-obs:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-obs.live-success {
+  background: linear-gradient(135deg, #10b981 0%, #047857 100%) !important;
+  border-color: #34d399 !important;
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.5) !important;
+}
+
+.btn-obs-clear {
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.28);
+  color: #fca5a5;
+  font-size: 0.8rem;
+  padding: 8px 12px;
+}
+
+.btn-obs-clear:hover {
+  background: rgba(239, 68, 68, 0.22);
+  border-color: rgba(239, 68, 68, 0.5);
+  color: #ffffff;
+}
+
+.btn-obs-clear:active {
+  transform: scale(0.98);
+}
+
 /* ==========================================================================
    WORKSPACE LAYOUT (TWO COLUMNS: EDITOR + PREVIEW)
    ========================================================================== */

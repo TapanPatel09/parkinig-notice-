@@ -228,6 +228,8 @@
 
     // Action buttons
     downloadBtn: document.getElementById('downloadBtn'),
+    sendObsBtn: document.getElementById('sendObsBtn'),
+    clearObsBtn: document.getElementById('clearObsBtn'),
     fullscreenBtn: document.getElementById('fullscreenBtn'),
     resetBtn: document.getElementById('resetBtn'),
     projectorPreviewBtn: document.getElementById('projectorPreviewBtn'),
@@ -472,12 +474,88 @@
   }
 
   /* ==========================================================================
-     HIGH-RES 1920 × 1080 PNG DOWNLOAD PIPELINE
+     HIGH-RES 1920 × 1080 CANVAS RENDERING & OBS BROADCAST PIPELINE
      ========================================================================== */
 
   /**
-   * Downloads the notice canvas at strictly 1920 × 1080 resolution
+   * Helper: Resolves the local backend server API URL
+   * Works whether opened via http://localhost:3000 or file:/// on local disk
+   */
+  function getApiBaseUrl() {
+    if (window.location.protocol.startsWith('http')) {
+      return window.location.origin;
+    }
+    return 'http://localhost:3000';
+  }
+
+  /**
+   * Renders the notice canvas strictly at 1920 × 1080 resolution
    * Guarantees fonts are ready and no parent CSS transforms distort the output
+   * @returns {Promise<HTMLCanvasElement>}
+   */
+  async function renderNotice1080pCanvas() {
+    // 1. Ensure all Gujarati & Web Fonts are fully loaded
+    if (document.fonts && document.fonts.ready) {
+      await document.fonts.ready;
+    }
+
+    // Small tick to ensure browser layout queue has settled
+    await new Promise(resolve => setTimeout(resolve, 100));
+
+    // 2. Clone noticeCanvas to an isolated offscreen container
+    // This is crucial: html2canvas is isolated from parent CSS scale transforms,
+    // guaranteeing an exact 1920x1080 bitmap output without offset or blurriness!
+    const targetCanvas = dom.noticeCanvas;
+    const clone = targetCanvas.cloneNode(true);
+
+    // Wrapper container fixed offscreen
+    const renderContainer = document.createElement('div');
+    renderContainer.style.position = 'fixed';
+    renderContainer.style.top = '0';
+    renderContainer.style.left = '-99999px';
+    renderContainer.style.width = '1920px';
+    renderContainer.style.height = '1080px';
+    renderContainer.style.margin = '0';
+    renderContainer.style.padding = '0';
+    renderContainer.style.overflow = 'hidden';
+    renderContainer.style.zIndex = '-9999';
+
+    // Ensure clone is strictly 1920x1080 with no transforms
+    clone.style.width = '1920px';
+    clone.style.height = '1080px';
+    clone.style.transform = 'none';
+    clone.style.margin = '0';
+
+    renderContainer.appendChild(clone);
+    document.body.appendChild(renderContainer);
+
+    /* global html2canvas */
+    if (typeof html2canvas !== 'function') {
+      document.body.removeChild(renderContainer);
+      throw new Error('html2canvas library is not loaded. Check connection.');
+    }
+
+    try {
+      const canvas = await html2canvas(clone, {
+        width: 1920,
+        height: 1080,
+        scale: 1, // 1:1 scale for exact 1920x1080 dimensions
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#F7F2E8',
+        logging: false
+      });
+      return canvas;
+    } finally {
+      if (document.body.contains(renderContainer)) {
+        document.body.removeChild(renderContainer);
+      }
+    }
+  }
+
+  /**
+   * Downloads the notice canvas at strictly 1920 × 1080 resolution
+   * Guarantees fonts are ready and downloads PNG file locally
    */
   async function downloadNotice() {
     const btn = dom.downloadBtn;
@@ -496,64 +574,11 @@
 
       showToast('Rendering high-resolution 1920×1080 image...', 'info');
 
-      // 1. Ensure all Gujarati & Web Fonts are fully loaded
-      if (document.fonts && document.fonts.ready) {
-        await document.fonts.ready;
-      }
+      const canvas = await renderNotice1080pCanvas();
 
-      // Small tick to ensure browser layout queue has settled
-      await new Promise(resolve => setTimeout(resolve, 100));
-
-      // 2. Clone noticeCanvas to an isolated offscreen container
-      // This is crucial: html2canvas is isolated from parent CSS scale transforms,
-      // guaranteeing an exact 1920x1080 bitmap output without offset or blurriness!
-      const targetCanvas = dom.noticeCanvas;
-      const clone = targetCanvas.cloneNode(true);
-
-      // Wrapper container fixed offscreen
-      const renderContainer = document.createElement('div');
-      renderContainer.style.position = 'fixed';
-      renderContainer.style.top = '0';
-      renderContainer.style.left = '-99999px';
-      renderContainer.style.width = '1920px';
-      renderContainer.style.height = '1080px';
-      renderContainer.style.margin = '0';
-      renderContainer.style.padding = '0';
-      renderContainer.style.overflow = 'hidden';
-      renderContainer.style.zIndex = '-9999';
-
-      // Ensure clone is strictly 1920x1080 with no transforms
-      clone.style.width = '1920px';
-      clone.style.height = '1080px';
-      clone.style.transform = 'none';
-      clone.style.margin = '0';
-
-      renderContainer.appendChild(clone);
-      document.body.appendChild(renderContainer);
-
-      // 3. Execute html2canvas capture
-      /* global html2canvas */
-      if (typeof html2canvas !== 'function') {
-        throw new Error('html2canvas library is not loaded. Check CDN connection.');
-      }
-
-      const canvas = await html2canvas(clone, {
-        width: 1920,
-        height: 1080,
-        scale: 1, // 1:1 scale for exact 1920x1080 dimensions
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: '#F7F2E8',
-        logging: false
-      });
-
-      // Remove temporary clone from DOM
-      document.body.removeChild(renderContainer);
-
-      // 4. Generate download file
+      // Generate download file
       const plateNumber = (state.vehicleNumber.trim() || 'GJ01AB1234').replace(/\s+/g, '-');
       const filename = `parking-notice-${plateNumber}.png`;
-
       const dataUrl = canvas.toDataURL('image/png', 1.0);
 
       // Trigger standard browser download anchor
@@ -574,6 +599,111 @@
         btn.disabled = false;
         btn.innerHTML = originalBtnText;
       }
+    }
+  }
+
+  /**
+   * Generates exact 1920x1080 notice and broadcasts it immediately to OBS Browser Source
+   */
+  async function sendToObs() {
+    const btn = dom.sendObsBtn;
+    const originalBtnText = btn ? btn.innerHTML : '';
+
+    try {
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = `
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" class="spin">
+            <circle cx="12" cy="12" r="10" stroke-dasharray="32" stroke-dashoffset="12"/>
+          </svg>
+          <span>Sending to OBS...</span>
+        `;
+      }
+
+      showToast('Rendering notice & sending to OBS...', 'info');
+
+      // 1. Render identical 1920x1080 canvas
+      const canvas = await renderNotice1080pCanvas();
+      const dataUrl = canvas.toDataURL('image/png', 1.0);
+
+      // 2. Package payload
+      const payload = {
+        imageData: dataUrl,
+        vehicleNumber: state.vehicleNumber.trim() || 'GJ01AB1234',
+        noticeType: state.noticeType,
+        programName: state.programName,
+        timestamp: Date.now()
+      };
+
+      // 3. POST to local server
+      const endpoint = `${getApiBaseUrl()}/api/send-notice`;
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      if (!response.ok) {
+        throw new Error(`Server returned HTTP ${response.status}`);
+      }
+
+      const result = await response.json();
+
+      // 4. Visual success indicator on button
+      if (btn) {
+        btn.classList.add('live-success');
+        btn.innerHTML = `
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="20 6 9 17 4 12" />
+          </svg>
+          <span>LIVE IN OBS!</span>
+        `;
+        setTimeout(() => {
+          btn.classList.remove('live-success');
+          btn.innerHTML = originalBtnText;
+          btn.disabled = false;
+        }, 2000);
+      }
+
+      const clientInfo = (result.obsClients > 0) 
+        ? ` (${result.obsClients} OBS source active)` 
+        : ' (Ready for OBS)';
+      showToast(`Notice sent to OBS successfully!${clientInfo}`, 'success');
+
+    } catch (err) {
+      console.error('Send to OBS failed:', err);
+      let errMsg = err.message || 'Unknown error';
+      if (errMsg.includes('Failed to fetch') || errMsg.includes('NetworkError') || errMsg.includes('ERR_CONNECTION_REFUSED')) {
+        errMsg = 'Local server not running! Run "node server.js" or double-click "start-server.bat".';
+      }
+      showToast('OBS update failed: ' + errMsg, 'error');
+
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = originalBtnText;
+      }
+    }
+  }
+
+  /**
+   * Clears the current notice from OBS screen
+   */
+  async function clearObsNotice() {
+    const btn = dom.clearObsBtn;
+    try {
+      if (btn) btn.disabled = true;
+      const endpoint = `${getApiBaseUrl()}/api/clear-notice`;
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      showToast('Notice cleared from OBS screen.', 'info');
+    } catch (err) {
+      console.warn('Clear OBS failed:', err);
+      showToast('Could not clear OBS: ' + (err.message || 'Server offline'), 'error');
+    } finally {
+      if (btn) btn.disabled = false;
     }
   }
 
@@ -815,6 +945,14 @@
     // 5. Action buttons
     if (dom.downloadBtn) {
       dom.downloadBtn.addEventListener('click', downloadNotice);
+    }
+
+    if (dom.sendObsBtn) {
+      dom.sendObsBtn.addEventListener('click', sendToObs);
+    }
+
+    if (dom.clearObsBtn) {
+      dom.clearObsBtn.addEventListener('click', clearObsNotice);
     }
 
     if (dom.resetBtn) {

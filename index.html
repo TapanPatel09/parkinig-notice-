@@ -18,6 +18,28 @@
   <!-- html2canvas CDN for high-resolution 1920x1080 PNG generation -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
+  <!-- Firebase SDK -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBqH79hOqnoqr3c7c_WIAx-0mJvs7zlclQ",
+      authDomain: "parking-notice-generator.firebaseapp.com",
+      projectId: "parking-notice-generator",
+      storageBucket: "parking-notice-generator.firebasestorage.app",
+      messagingSenderId: "131832363853",
+      appId: "1:131832363853:web:d7400d0a4c1d4c9faad504",
+      measurementId: "G-MNDZ3G5XBG"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
+
+    window.firebaseApp = app;
+    window.firebaseAnalytics = analytics;
+  </script>
+
   <!-- Custom Stylesheet -->
   <link rel="stylesheet" href="style.css">
 </head>
@@ -70,6 +92,22 @@
             <line x1="12" y1="15" x2="12" y2="3" />
           </svg>
           <span>Download Notice (PNG)</span>
+        </button>
+
+        <button type="button" class="btn btn-obs" id="sendObsBtn" title="Broadcast Live 1920x1080 Notice directly to OBS Studio">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="2.5" />
+            <path d="M16.24 7.76a6 6 0 0 1 0 8.49m-8.48-.01a6 6 0 0 1 0-8.49m11.31-2.82a10 10 0 0 1 0 14.14m-14.14 0a10 10 0 0 1 0-14.14" />
+          </svg>
+          <span>SEND TO OBS</span>
+        </button>
+
+        <button type="button" class="btn btn-obs-clear" id="clearObsBtn" title="Clear / Hide Notice from OBS Screen">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+          <span>Clear OBS</span>
         </button>
       </div>
     </header>
