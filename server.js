@@ -73,8 +73,9 @@ function broadcastSseEvent(eventType, payload) {
  */
 function setCorsHeaders(res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Private-Network', 'true');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Cache-Control, Pragma');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Access-Control-Request-Private-Network, Cache-Control, Pragma');
 }
 
 /**
@@ -91,7 +92,8 @@ const server = http.createServer((req, res) => {
   }
 
   const parsedUrl = url.parse(req.url, true);
-  const pathname = parsedUrl.pathname;
+  const rawPath = parsedUrl.pathname || '/';
+  const pathname = (rawPath.length > 1 && rawPath.endsWith('/')) ? rawPath.slice(0, -1) : rawPath;
 
   // =========================================================================
   // API ROUTE: Send notice from web app -> OBS
@@ -272,6 +274,13 @@ const server = http.createServer((req, res) => {
       latestVehicle: latestNotice ? latestNotice.vehicleNumber : null,
       lastUpdated: latestNotice ? latestNotice.timestamp : null
     }));
+    return;
+  }
+
+  // Handle unmatched API routes with clean JSON 404 instead of falling back to static files
+  if (pathname.startsWith('/api/')) {
+    res.writeHead(404, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ error: `Endpoint not found: ${pathname}` }));
     return;
   }
 

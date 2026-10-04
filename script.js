@@ -236,6 +236,20 @@
     exitFullscreenBtn: document.getElementById('exitFullscreenBtn'),
     fullscreenExitBar: document.getElementById('fullscreenExitBar'),
 
+    // OBS Integration & Cloud Host Elements
+    httpsObsBanner: document.getElementById('httpsObsBanner'),
+    closeBannerBtn: document.getElementById('closeBannerBtn'),
+    obsSettingsBtn: document.getElementById('obsSettingsBtn'),
+    obsModalOverlay: document.getElementById('obsModalOverlay'),
+    closeObsModalBtn: document.getElementById('closeObsModalBtn'),
+    cancelObsModalBtn: document.getElementById('cancelObsModalBtn'),
+    saveObsModalBtn: document.getElementById('saveObsModalBtn'),
+    obsServerUrlInput: document.getElementById('obsServerUrlInput'),
+    resetObsUrlBtn: document.getElementById('resetObsUrlBtn'),
+    modalPulseDot: document.getElementById('modalPulseDot'),
+    modalStatusText: document.getElementById('modalStatusText'),
+    modalStatusDetail: document.getElementById('modalStatusDetail'),
+
     // Canvas Preview Elements
     canvasProgramBanner: document.getElementById('canvasProgramBanner'),
     canvasProgramName: document.getElementById('canvasProgramName'),
@@ -479,12 +493,28 @@
 
   /**
    * Helper: Resolves the local backend server API URL
-   * Works whether opened via http://localhost:3000 or file:/// on local disk
+   * Works whether opened via http://localhost:3000, file:///, Live Server, or external host.
    */
   function getApiBaseUrl() {
-    if (window.location.protocol.startsWith('http')) {
+    try {
+      const customUrl = localStorage.getItem('obs_server_url');
+      if (customUrl && customUrl.trim()) {
+        return customUrl.trim().replace(/\/+$/, '');
+      }
+    } catch (e) {
+      // Ignore localStorage errors
+    }
+
+    // If currently running directly on the local Node OBS server (e.g. localhost:3000)
+    const isLocalhost = window.location.hostname === 'localhost' || 
+                        window.location.hostname === '127.0.0.1' || 
+                        window.location.hostname === '[::1]';
+
+    if (isLocalhost && window.location.port === '3000') {
       return window.location.origin;
     }
+
+    // Default to local Node OBS server port 3000
     return 'http://localhost:3000';
   }
 
@@ -608,6 +638,14 @@
   async function sendToObs() {
     const btn = dom.sendObsBtn;
     const originalBtnText = btn ? btn.innerHTML : '';
+    const apiUrl = getApiBaseUrl();
+
+    // Check for HTTPS Mixed Content restriction (e.g. viewing on Firebase Hosting)
+    if (window.location.protocol === 'https:' && apiUrl.startsWith('http:')) {
+      showToast('OBS Live Broadcast requires the local server. Since this page was loaded over HTTPS (cloud host), browser security blocks http://localhost:3000. Please launch start-server.bat and open http://localhost:3000!', 'error', 8000);
+      openObsSettingsModal();
+      return;
+    }
 
     try {
       if (btn) {
@@ -636,18 +674,30 @@
       };
 
       // 3. POST to local server
-      const endpoint = `${getApiBaseUrl()}/api/send-notice`;
+      const endpoint = `${apiUrl}/api/send-notice`;
       const response = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
 
-      if (!response.ok) {
-        throw new Error(`Server returned HTTP ${response.status}`);
+      // Defensive check: verify JSON response before parsing
+      const contentType = response.headers.get('content-type') || '';
+      let result = null;
+
+      if (contentType.includes('application/json')) {
+        result = await response.json();
+      } else {
+        const text = await response.text();
+        if (text.trim().startsWith('<') || text.includes('<!DOCTYPE')) {
+          throw new Error('Server returned an HTML webpage instead of the OBS API. If you are using Firebase Hosting, Live Server, or another port, open http://localhost:3000 (run start-server.bat) to connect directly to OBS.');
+        }
+        throw new Error(`Unexpected server response (${response.status}): ${text.slice(0, 100)}`);
       }
 
-      const result = await response.json();
+      if (!response.ok) {
+        throw new Error((result && result.error) ? result.error : `Server returned HTTP ${response.status}`);
+      }
 
       // 4. Visual success indicator on button
       if (btn) {
@@ -665,18 +715,25 @@
         }, 2000);
       }
 
-      const clientInfo = (result.obsClients > 0) 
+      const clientInfo = (result && result.obsClients > 0) 
         ? ` (${result.obsClients} OBS source active)` 
         : ' (Ready for OBS)';
       showToast(`Notice sent to OBS successfully!${clientInfo}`, 'success');
+
+      // Refresh status pill
+      checkObsServerStatus();
 
     } catch (err) {
       console.error('Send to OBS failed:', err);
       let errMsg = err.message || 'Unknown error';
       if (errMsg.includes('Failed to fetch') || errMsg.includes('NetworkError') || errMsg.includes('ERR_CONNECTION_REFUSED')) {
-        errMsg = 'Local server not running! Run "node server.js" or double-click "start-server.bat".';
+        if (window.location.protocol === 'https:') {
+          errMsg = 'Cannot connect to local OBS server from HTTPS. Open http://localhost:3000 via start-server.bat!';
+        } else {
+          errMsg = 'Local server not running! Run "node server.js" or double-click "start-server.bat".';
+        }
       }
-      showToast('OBS update failed: ' + errMsg, 'error');
+      showToast('OBS update failed: ' + errMsg, 'error', 7000);
 
       if (btn) {
         btn.disabled = false;
@@ -690,20 +747,198 @@
    */
   async function clearObsNotice() {
     const btn = dom.clearObsBtn;
+    const apiUrl = getApiBaseUrl();
+
+    if (window.location.protocol === 'https:' && apiUrl.startsWith('http:')) {
+      showToast('OBS control requires local server. Please open http://localhost:3000 via start-server.bat.', 'error', 6000);
+      return;
+    }
+
     try {
       if (btn) btn.disabled = true;
-      const endpoint = `${getApiBaseUrl()}/api/clear-notice`;
+      const endpoint = `${apiUrl}/api/clear-notice`;
       const response = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' }
       });
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+      const contentType = response.headers.get('content-type') || '';
+      let result = null;
+
+      if (contentType.includes('application/json')) {
+        result = await response.json();
+      } else {
+        const text = await response.text();
+        if (text.trim().startsWith('<') || text.includes('<!DOCTYPE')) {
+          throw new Error('Server returned an HTML page. Please open http://localhost:3000 via start-server.bat.');
+        }
+        throw new Error(`Server returned HTTP ${response.status}`);
+      }
+
+      if (!response.ok) {
+        throw new Error((result && result.error) ? result.error : `HTTP ${response.status}`);
+      }
+
       showToast('Notice cleared from OBS screen.', 'info');
+      checkObsServerStatus();
     } catch (err) {
       console.warn('Clear OBS failed:', err);
-      showToast('Could not clear OBS: ' + (err.message || 'Server offline'), 'error');
+      let errMsg = err.message || 'Server offline';
+      if (errMsg.includes('Failed to fetch') && window.location.protocol === 'https:') {
+        errMsg = 'Blocked by HTTPS mixed content. Open http://localhost:3000 via start-server.bat.';
+      }
+      showToast('Could not clear OBS: ' + errMsg, 'error');
     } finally {
       if (btn) btn.disabled = false;
+    }
+  }
+
+  /**
+   * Periodically checks OBS server connectivity and updates UI badge
+   */
+  async function checkObsServerStatus() {
+    const indicator = document.getElementById('liveIndicator');
+    const apiUrl = getApiBaseUrl();
+
+    if (!indicator) return;
+
+    if (window.location.protocol === 'https:' && apiUrl.startsWith('http:')) {
+      indicator.title = 'Page is running on HTTPS (cloud host). To broadcast live to OBS, open http://localhost:3000 via start-server.bat';
+      const textEl = indicator.querySelector('.live-text');
+      const dotEl = indicator.querySelector('.pulse-dot');
+      if (textEl) textEl.textContent = 'CLOUD HOST (USE LOCALHOST:3000 FOR OBS)';
+      if (dotEl) {
+        dotEl.style.backgroundColor = '#f59e0b';
+        dotEl.style.boxShadow = '0 0 8px #f59e0b';
+      }
+      return;
+    }
+
+    try {
+      const endpoint = `${apiUrl}/api/status`;
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 2000);
+      const res = await fetch(endpoint, { signal: controller.signal, cache: 'no-store' });
+      clearTimeout(timeoutId);
+
+      const contentType = res.headers.get('content-type') || '';
+      if (res.ok && contentType.includes('application/json')) {
+        const data = await res.json();
+        const textEl = indicator.querySelector('.live-text');
+        const dotEl = indicator.querySelector('.pulse-dot');
+        if (textEl) {
+          textEl.textContent = data.obsClients > 0 
+            ? `OBS LIVE (${data.obsClients} SOURCE)` 
+            : 'OBS SERVER READY';
+        }
+        if (dotEl) {
+          dotEl.style.backgroundColor = '#10b981';
+          dotEl.style.boxShadow = '0 0 8px #10b981';
+        }
+        indicator.title = `OBS Local Server Connected (${data.obsClients} active OBS Browser Sources)`;
+        return;
+      }
+      throw new Error('Invalid response');
+    } catch (e) {
+      const textEl = indicator.querySelector('.live-text');
+      const dotEl = indicator.querySelector('.pulse-dot');
+      if (textEl) textEl.textContent = 'OBS SERVER OFFLINE';
+      if (dotEl) {
+        dotEl.style.backgroundColor = '#ef4444';
+        dotEl.style.boxShadow = '0 0 8px #ef4444';
+      }
+      indicator.title = 'OBS Local Server is offline. Start it by running start-server.bat and visit http://localhost:3000.';
+    }
+  }
+
+  /**
+   * OBS Settings Modal Management
+   */
+  async function openObsSettingsModal() {
+    if (!dom.obsModalOverlay) return;
+    dom.obsModalOverlay.style.display = 'flex';
+
+    if (dom.obsServerUrlInput) {
+      const current = localStorage.getItem('obs_server_url') || '';
+      dom.obsServerUrlInput.value = current || 'http://localhost:3000';
+    }
+
+    await testModalObsConnection();
+  }
+
+  function closeObsSettingsModal() {
+    if (dom.obsModalOverlay) {
+      dom.obsModalOverlay.style.display = 'none';
+    }
+  }
+
+  async function testModalObsConnection() {
+    if (!dom.modalStatusText || !dom.modalStatusDetail || !dom.modalPulseDot) return;
+
+    dom.modalStatusText.textContent = 'Checking server connection...';
+    dom.modalStatusDetail.textContent = 'Connecting to ' + getApiBaseUrl() + '...';
+    dom.modalPulseDot.style.backgroundColor = '#94a3b8';
+    dom.modalPulseDot.style.boxShadow = 'none';
+
+    const apiUrl = getApiBaseUrl();
+
+    if (window.location.protocol === 'https:' && apiUrl.startsWith('http:')) {
+      dom.modalStatusText.textContent = 'HTTPS Security Restriction';
+      dom.modalStatusDetail.innerHTML = 'This page is running on <strong>HTTPS</strong> (cloud hosting). Browsers block HTTPS pages from reaching local <code>http://localhost:3000</code>. <br><br>👉 <strong>Solution:</strong> On the PC running OBS, run <code>start-server.bat</code> and open <a href="http://localhost:3000" target="_blank" rel="noopener">http://localhost:3000</a> directly!';
+      dom.modalPulseDot.style.backgroundColor = '#f59e0b';
+      dom.modalPulseDot.style.boxShadow = '0 0 8px #f59e0b';
+      return;
+    }
+
+    try {
+      const endpoint = `${apiUrl}/api/status`;
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 2500);
+      const res = await fetch(endpoint, { signal: controller.signal, cache: 'no-store' });
+      clearTimeout(timeoutId);
+
+      const contentType = res.headers.get('content-type') || '';
+      if (res.ok && contentType.includes('application/json')) {
+        const data = await res.json();
+        dom.modalStatusText.textContent = 'OBS Server Online & Connected';
+        dom.modalStatusDetail.textContent = `Server responding at ${apiUrl}. Active OBS Browser Sources: ${data.obsClients}.`;
+        dom.modalPulseDot.style.backgroundColor = '#10b981';
+        dom.modalPulseDot.style.boxShadow = '0 0 10px #10b981';
+        return;
+      }
+      throw new Error('Received non-JSON response');
+    } catch (err) {
+      dom.modalStatusText.textContent = 'OBS Server Unreachable';
+      dom.modalStatusDetail.textContent = `Could not connect to ${apiUrl}. Make sure you double-click "start-server.bat" or run "node server.js" on your PC.`;
+      dom.modalPulseDot.style.backgroundColor = '#ef4444';
+      dom.modalPulseDot.style.boxShadow = '0 0 10px #ef4444';
+    }
+  }
+
+  async function saveObsSettings() {
+    if (!dom.obsServerUrlInput) return;
+    const val = dom.obsServerUrlInput.value.trim();
+    if (val) {
+      try {
+        localStorage.setItem('obs_server_url', val);
+        showToast('OBS Server URL updated: ' + val, 'success');
+      } catch (e) {
+        showToast('Failed to save settings: ' + e.message, 'error');
+      }
+    }
+    await testModalObsConnection();
+    checkObsServerStatus();
+  }
+
+  function resetObsSettings() {
+    try {
+      localStorage.removeItem('obs_server_url');
+      if (dom.obsServerUrlInput) dom.obsServerUrlInput.value = 'http://localhost:3000';
+      showToast('Reset to default (http://localhost:3000)', 'info');
+      testModalObsConnection();
+      checkObsServerStatus();
+    } catch (e) {
+      console.warn(e);
     }
   }
 
@@ -955,6 +1190,42 @@
       dom.clearObsBtn.addEventListener('click', clearObsNotice);
     }
 
+    // OBS Settings & Banner
+    if (dom.obsSettingsBtn) {
+      dom.obsSettingsBtn.addEventListener('click', openObsSettingsModal);
+    }
+
+    if (dom.closeObsModalBtn) {
+      dom.closeObsModalBtn.addEventListener('click', closeObsSettingsModal);
+    }
+
+    if (dom.cancelObsModalBtn) {
+      dom.cancelObsModalBtn.addEventListener('click', closeObsSettingsModal);
+    }
+
+    if (dom.saveObsModalBtn) {
+      dom.saveObsModalBtn.addEventListener('click', saveObsSettings);
+    }
+
+    if (dom.resetObsUrlBtn) {
+      dom.resetObsUrlBtn.addEventListener('click', resetObsSettings);
+    }
+
+    if (dom.obsModalOverlay) {
+      dom.obsModalOverlay.addEventListener('click', e => {
+        if (e.target === dom.obsModalOverlay) closeObsSettingsModal();
+      });
+    }
+
+    if (dom.closeBannerBtn && dom.httpsObsBanner) {
+      dom.closeBannerBtn.addEventListener('click', () => {
+        dom.httpsObsBanner.style.display = 'none';
+        try {
+          sessionStorage.setItem('dismissed_https_banner', '1');
+        } catch (e) {}
+      });
+    }
+
     if (dom.resetBtn) {
       dom.resetBtn.addEventListener('click', resetForm);
     }
@@ -997,11 +1268,26 @@
     setupEventListeners();
     updatePreview();
 
+    // Show HTTPS cloud banner if on HTTPS
+    if (window.location.protocol === 'https:' && dom.httpsObsBanner) {
+      try {
+        if (!sessionStorage.getItem('dismissed_https_banner')) {
+          dom.httpsObsBanner.style.display = 'block';
+        }
+      } catch (e) {
+        dom.httpsObsBanner.style.display = 'block';
+      }
+    }
+
     // Initial scale calculation after paint
     window.requestAnimationFrame(() => {
       calculateScale();
       setTimeout(calculateScale, 150);
     });
+
+    // Check OBS status immediately and poll every 5s
+    checkObsServerStatus();
+    setInterval(checkObsServerStatus, 5000);
 
     console.log('Spiritual Program Parking Notice Generator initialized successfully.');
   }
