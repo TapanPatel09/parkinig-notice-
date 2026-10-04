@@ -352,7 +352,7 @@
   function updateNoticeText() {
     // 1. Notice Title
     if (dom.canvasNoticeTitle) {
-      dom.canvasNoticeTitle.textContent = state.noticeTitle.trim() || 'વાહન સૂચના';
+      dom.canvasNoticeTitle.textContent = state.noticeTitle.trim() || 'પાર્કિંગ સૂચના';
     }
 
     // 2. Message Body
