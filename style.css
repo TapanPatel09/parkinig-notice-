@@ -1671,3 +1671,20 @@ textarea.form-control {
   gap: 12px;
   background: rgba(255, 255, 255, 0.02);
 }
+
+.btn-text-action {
+  background: transparent;
+  border: none;
+  color: #38bdf8;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 3px 8px;
+  border-radius: var(--radius-sm);
+  transition: all 0.15s ease;
+}
+
+.btn-text-action:hover {
+  color: #7dd3fc;
+  background: rgba(56, 189, 248, 0.12);
+}

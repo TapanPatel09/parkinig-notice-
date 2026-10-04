@@ -18,27 +18,9 @@
   <!-- html2canvas CDN for high-resolution 1920x1080 PNG generation -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
-  <!-- Firebase SDK -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyBqH79hOqnoqr3c7c_WIAx-0mJvs7zlclQ",
-      authDomain: "parking-notice-generator.firebaseapp.com",
-      projectId: "parking-notice-generator",
-      storageBucket: "parking-notice-generator.firebasestorage.app",
-      messagingSenderId: "131832363853",
-      appId: "1:131832363853:web:d7400d0a4c1d4c9faad504",
-      measurementId: "G-MNDZ3G5XBG"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const analytics = getAnalytics(app);
-
-    window.firebaseApp = app;
-    window.firebaseAnalytics = analytics;
-  </script>
+  <!-- Firebase SDKs for Real-time Private OBS Sync -->
+  <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-database-compat.js"></script>
 
   <!-- Custom Stylesheet -->
   <link rel="stylesheet" href="style.css">
@@ -110,30 +92,15 @@
           <span>Clear OBS</span>
         </button>
 
-        <button type="button" class="btn btn-obs-settings" id="obsSettingsBtn" title="OBS Server Configuration & Status">
+        <button type="button" class="btn btn-obs-settings" id="obsSettingsBtn" title="Get Private OBS Browser Source Link">
           <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="3"></circle>
-            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
           </svg>
-          <span>OBS Setup</span>
+          <span>OBS Link</span>
         </button>
       </div>
     </header>
-
-    <!-- HTTPS / Cloud Host OBS Notice Banner -->
-    <div class="https-obs-banner" id="httpsObsBanner" style="display: none;">
-      <div class="https-banner-content">
-        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" class="banner-icon">
-          <circle cx="12" cy="12" r="10"></circle>
-          <line x1="12" y1="8" x2="12" y2="12"></line>
-          <line x1="12" y1="16" x2="12.01" y2="16"></line>
-        </svg>
-        <span>
-          <strong>Direct OBS Broadcast:</strong> You are accessing this app via cloud/HTTPS hosting. To broadcast directly to OBS Studio in 1080p, run <code>start-server.bat</code> on your PC and open <a href="http://localhost:3000" target="_blank" rel="noopener">http://localhost:3000</a>.
-        </span>
-        <button type="button" class="banner-close-btn" id="closeBannerBtn" title="Dismiss banner">&times;</button>
-      </div>
-    </div>
 
     <!-- MAIN TWO-COLUMN WORKSPACE -->
     <main class="main-workspace">
@@ -499,31 +466,25 @@
               </div>
 
               <!-- 3. TOP-LEFT LOGO CONTAINER -->
-              <!-- ======================================================
-                    MANUALLY CHANGE THIS LOGO PATH IN CODE IF DESIRED
-                    ====================================================== -->
-              <!-- <div class="logo-wrapper logo-left-wrapper" title="Top-Left Logo">
+              <div class="logo-wrapper logo-left-wrapper" title="Top-Left Logo">
                 <img id="leftLogo" class="logo-left" src="assets/baps_logo.png" alt="Organization Logo Left" onerror="this.style.opacity='0.4'">
-              </div> -->
+              </div>
 
               <!-- 4. TOP-RIGHT LOGO CONTAINER -->
-              <!-- ======================================================
-                    MANUALLY CHANGE THIS LOGO PATH IN CODE IF DESIRED
-                    ====================================================== -->
-              <!-- <div class="logo-wrapper logo-right-wrapper" title="Top-Right Logo">
+              <div class="logo-wrapper logo-right-wrapper" title="Top-Right Logo">
                 <img id="rightLogo" class="logo-right" src="assets/logo-right.png" alt="Organization Logo Right"
                   onerror="this.style.opacity='0.4'">
-              </div> -->
+              </div>
 
               <!-- 5. MAIN NOTICE CONTENT (VERTICALLY & HORIZONTALLY BALANCED) -->
               <div class="notice-inner-content">
 
                 <!-- Program Name Banner (Top / Center - Optional, hidden if empty) -->
-                <!-- <div class="program-header-banner" id="canvasProgramBanner">
+                <div class="program-header-banner" id="canvasProgramBanner">
                   <span class="spiritual-flourish">✤</span>
                   <span class="program-name-text" id="canvasProgramName">SPIRITUAL PROGRAM</span>
                   <span class="spiritual-flourish">✤</span>
-                </div> -->
+                </div>
 
                 <!-- Notice Heading / Title (Default: વાહન સૂચના) -->
                 <div class="notice-title-wrapper">
@@ -533,21 +494,20 @@
                 </div>
 
                 <!-- Vehicle Illustration & Type Badge -->
-                <!-- <div class="vehicle-center-block">
+                <div class="vehicle-center-block">
                   <div class="vehicle-svg-container" id="canvasVehicleIconWrapper">
                     <!-- Dynamic Crisp Vector Illustration rendered by JavaScript -->
-                  <!-- </div> -->
-                  <!-- <div class="vehicle-type-label" id="canvasVehicleTypeBadge"> -->
-                    <!-- <span class="veh-label-text" id="canvasVehicleTypeText">CAR</span> -->
-                  <!-- </div> -->
-                <!-- </div> -->
+                  </div>
+                  <div class="vehicle-type-label" id="canvasVehicleTypeBadge">
+                    <span class="veh-label-text" id="canvasVehicleTypeText">CAR</span>
+                  </div>
+                </div>
 
                 <!-- REALISTIC INDIAN VEHICLE NUMBER PLATE (HSRP SPECIFICATION) -->
                 <div class="plate-centerpiece-wrapper">
                   <div class="indian-hsrp-plate" id="canvasPlate">
                     <!-- Left Blue IND Band with Ashoka Chakra -->
                     <div class="hsrp-ind-strip">
-                      <!-- <div class="hsrp-ashoka-chakra" title="Ashoka Chakra"></div> -->
                       <div class="hsrp-ind-code">IND</div>
                     </div>
 
@@ -572,16 +532,16 @@
                 </div>
 
                 <!-- LOCATION & COOPERATION FOOTER (Optional, hidden if empty) -->
-                <!-- <div class="notice-footer-area"> -->
-                  <!-- <div class="location-badge" id="canvasLocationBlock"> -->
-                    <!-- <svg class="location-pin-icon" viewBox="0 0 24 24" fill="currentColor"> -->
-                      <!-- <path -->
-                        <!-- d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" /> -->
-                    <!-- </svg> -->
-                    <!-- <span class="location-label">સ્થળ / PARKING LOCATION:</span> -->
-                    <!-- <span class="location-value" id="canvasLocationName">MAIN PARKING AREA</span> -->
-                  <!-- </div> -->
-                <!-- </div> -->
+                <div class="notice-footer-area">
+                  <div class="location-badge" id="canvasLocationBlock">
+                    <svg class="location-pin-icon" viewBox="0 0 24 24" fill="currentColor">
+                      <path
+                        d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
+                    </svg>
+                    <span class="location-label">સ્થળ / PARKING LOCATION:</span>
+                    <span class="location-value" id="canvasLocationName">MAIN PARKING AREA</span>
+                  </div>
+                </div>
 
               </div>
             </article>
@@ -604,7 +564,7 @@
 
     </main>
 
-    <!-- OBS SETTINGS MODAL -->
+    <!-- PRIVATE OBS SESSION MODAL -->
     <div class="modal-overlay" id="obsModalOverlay" style="display: none;">
       <div class="modal-card">
         <div class="modal-header">
@@ -613,48 +573,60 @@
               <circle cx="12" cy="12" r="2.5" />
               <path d="M16.24 7.76a6 6 0 0 1 0 8.49m-8.48-.01a6 6 0 0 1 0-8.49m11.31-2.82a10 10 0 0 1 0 14.14m-14.14 0a10 10 0 0 1 0-14.14" />
             </svg>
-            OBS Studio Integration Settings
+            Private OBS Studio Setup
           </h3>
           <button type="button" class="modal-close-btn" id="closeObsModalBtn">&times;</button>
         </div>
         <div class="modal-body">
-          <div class="status-summary-box" id="obsModalStatusBox">
+          <div class="status-summary-box">
             <div class="status-dot-row">
-              <span class="pulse-dot" id="modalPulseDot"></span>
-              <strong id="modalStatusText">Checking connection...</strong>
+              <span class="pulse-dot"></span>
+              <strong>Private Real-Time Cloud Sync Active</strong>
             </div>
-            <p id="modalStatusDetail" class="status-detail-desc"></p>
+            <p class="status-detail-desc">
+              Your notices are 100% private. Only the OBS Browser Source configured with your unique session link receives your notices in real time.
+            </p>
           </div>
 
           <div class="form-group" style="margin-top: 16px;">
-            <label class="form-label" for="obsServerUrlInput">OBS Broadcast Server URL</label>
-            <div class="input-with-reset">
-              <input type="text" class="text-input" id="obsServerUrlInput" placeholder="http://localhost:3000" />
-              <button type="button" class="btn btn-secondary btn-sm" id="resetObsUrlBtn">Reset Default</button>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+              <label class="form-label" style="margin: 0;">Your Private OBS Browser Source URL</label>
+              <button type="button" class="btn-text-action" id="regenSessionBtn" title="Generate a new private session ID">
+                ↻ Reset Session ID
+              </button>
             </div>
-            <span class="field-hint">Default: <code>http://localhost:3000</code>. Only change if running on custom port or across network.</span>
+            <div class="input-with-reset">
+              <input type="text" class="text-input" id="obsSessionUrlInput" readonly spellcheck="false" />
+              <button type="button" class="btn btn-primary btn-sm" id="copyObsUrlBtn">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                </svg>
+                <span id="copyBtnLabel">Copy URL</span>
+              </button>
+            </div>
+            <span class="field-hint">Copy this URL and paste it into OBS Studio as a <strong>Browser Source</strong>.</span>
+          </div>
+
+          <div style="margin-top: 14px; display: flex; gap: 10px;">
+            <a id="openObsPreviewLink" href="#" target="_blank" rel="noopener" class="btn btn-secondary btn-sm" style="flex: 1; text-decoration: none;">
+              ↗ Open OBS Page in New Tab
+            </a>
           </div>
 
           <div class="obs-instructions-box">
             <h4>How to Connect to OBS Studio:</h4>
             <ol>
-              <li>Run <strong>start-server.bat</strong> (or <code>node server.js</code>) on your computer.</li>
-              <li>Open your browser to <a href="http://localhost:3000" target="_blank" rel="noopener"><strong>http://localhost:3000</strong></a>.</li>
-              <li>In OBS Studio, add a new <strong>Browser Source</strong>:
-                <ul>
-                  <li><strong>URL:</strong> <code>http://localhost:3000/obs.html</code></li>
-                  <li><strong>Width:</strong> <code>1920</code></li>
-                  <li><strong>Height:</strong> <code>1080</code></li>
-                  <li>Check <em>"Shutdown source when not visible"</em> (recommended)</li>
-                </ul>
-              </li>
-              <li>Click <strong>SEND TO OBS</strong> to instantly broadcast the notice in real time!</li>
+              <li>In OBS Studio, click <strong>+</strong> under <strong>Sources</strong> and choose <strong>Browser</strong>.</li>
+              <li>Paste your <strong>Private OBS URL</strong> from above into the <strong>URL</strong> field.</li>
+              <li>Set <strong>Width:</strong> <code>1920</code> and <strong>Height:</strong> <code>1080</code>.</li>
+              <li>Check <em>"Shutdown source when not visible"</em>.</li>
+              <li>Click <strong>OK</strong>. Now whenever you click <strong>SEND TO OBS</strong>, your notice updates on your stream instantly without refreshing!</li>
             </ol>
           </div>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" id="cancelObsModalBtn">Close</button>
-          <button type="button" class="btn btn-primary" id="saveObsModalBtn">Save & Test Connection</button>
         </div>
       </div>
     </div>

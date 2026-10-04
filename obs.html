@@ -4,6 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=1920, height=1080, initial-scale=1.0">
   <title>OBS Live Display - Spiritual Parking Notice</title>
+  <!-- Firebase SDKs for Direct Real-time Cloud Sync -->
+  <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-database-compat.js"></script>
   <style>
     * {
       box-sizing: border-box;
@@ -39,7 +42,7 @@
       object-fit: contain;
       pointer-events: none;
       opacity: 0;
-      transition: opacity 0.22s ease-in-out;
+      transition: opacity 0.25s ease-in-out;
       will-change: opacity;
     }
 
@@ -51,6 +54,50 @@
     .notice-layer.fading {
       opacity: 0;
       z-index: 1;
+    }
+
+    /* Setup Helper Notice (Only shown if opened in browser without a session query) */
+    .setup-helper {
+      display: none;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(15, 23, 42, 0.95);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 12px;
+      padding: 32px 40px;
+      color: #f1f5f9;
+      text-align: center;
+      max-width: 680px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(10px);
+      z-index: 50;
+    }
+
+    .setup-helper h2 {
+      font-size: 24px;
+      color: #38bdf8;
+      margin-bottom: 12px;
+    }
+
+    .setup-helper p {
+      font-size: 15px;
+      color: #94a3b8;
+      line-height: 1.6;
+      margin-bottom: 20px;
+    }
+
+    .setup-helper code {
+      display: block;
+      background: rgba(0, 0, 0, 0.5);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      border-radius: 6px;
+      padding: 10px 16px;
+      color: #fef08a;
+      font-family: monospace;
+      font-size: 14px;
+      word-break: break-all;
     }
 
     /* Optional test/debug badge (visible only when url has ?debug=1) */
@@ -88,6 +135,16 @@
     <img id="layerA" class="notice-layer" alt="Parking Notice Display A" />
     <img id="layerB" class="notice-layer" alt="Parking Notice Display B" />
 
+    <!-- Setup guidance (Shown only when opened directly without a session ID) -->
+    <div id="setupHelper" class="setup-helper">
+      <h2>OBS Browser Source Ready</h2>
+      <p>This OBS display requires your private session link to receive live notices privately.</p>
+      <code>https://parking-notice-generator-8d30c.web.app/obs?session=YOUR_SESSION_ID</code>
+      <p style="margin-top: 16px; margin-bottom: 0; font-size: 13px; color: #64748b;">
+        Open the Notice Generator web app, click <strong>OBS Setup</strong> to copy your unique private URL, and paste it into this OBS Browser Source.
+      </p>
+    </div>
+
     <!-- Debug/Testing Status Indicator (Hidden on broadcast unless ?debug=1 is in URL) -->
     <div id="debugBadge" class="debug-badge">OBS Disconnected</div>
   </main>
@@ -96,17 +153,40 @@
     (function () {
       'use strict';
 
+      // 1. Firebase Configuration for parking-notice-generator-8d30c
+      const FIREBASE_CONFIG = {
+        apiKey: "AIzaSyDO7HWx9oKXuWDHoDSf3jFO2Vh82s0vVME",
+        authDomain: "parking-notice-generator-8d30c.firebaseapp.com",
+        databaseURL: "https://parking-notice-generator-8d30c-default-rtdb.firebaseio.com",
+        projectId: "parking-notice-generator-8d30c",
+        storageBucket: "parking-notice-generator-8d30c.firebasestorage.app",
+        messagingSenderId: "77367776052",
+        appId: "1:77367776052:web:fcd5a671d95c266d47cb61"
+      };
+
       const layerA = document.getElementById('layerA');
       const layerB = document.getElementById('layerB');
       const debugBadge = document.getElementById('debugBadge');
+      const setupHelper = document.getElementById('setupHelper');
 
       let activeLayer = null; // 'A' or 'B'
       let currentTimestamp = 0;
-      let sseConnection = null;
 
-      // Show debug badge if '?debug=1' is in query string
+      // Extract session ID and debug flag from URL
       const urlParams = new URLSearchParams(window.location.search);
-      if (urlParams.has('debug')) {
+      let sessionId = urlParams.get('session');
+      if (!sessionId) {
+        try {
+          sessionId = localStorage.getItem('obs_session_id');
+        } catch (e) {}
+      }
+      if (!sessionId) {
+        sessionId = 'default';
+      }
+
+      const isDebug = urlParams.has('debug');
+
+      if (isDebug && debugBadge) {
         debugBadge.style.display = 'block';
       }
 
@@ -114,7 +194,7 @@
         if (debugBadge) {
           debugBadge.textContent = text;
           debugBadge.className = 'debug-badge ' + (statusClass || '');
-          if (urlParams.has('debug')) debugBadge.style.display = 'block';
+          if (isDebug) debugBadge.style.display = 'block';
         }
       }
 
@@ -127,6 +207,9 @@
           return; // Already showing this exact version
         }
         currentTimestamp = timestamp || Date.now();
+
+        // Hide setup helper if visible
+        if (setupHelper) setupHelper.style.display = 'none';
 
         // Determine next layer to cross-fade into
         const targetLayer = (activeLayer === 'A') ? layerB : layerA;
@@ -147,6 +230,12 @@
           activeLayer = (targetLayer === layerA) ? 'A' : 'B';
           updateStatus('Notice Live (' + new Date(currentTimestamp).toLocaleTimeString() + ')', 'connected');
         };
+        tempImg.onerror = function() {
+          // Direct fallback if preload event fails
+          targetLayer.src = imageData;
+          targetLayer.classList.add('active');
+          activeLayer = (targetLayer === layerA) ? 'A' : 'B';
+        };
         tempImg.src = imageData;
       }
 
@@ -166,85 +255,54 @@
         updateStatus('Notice Cleared', 'connected');
       }
 
-      /**
-       * Initial fetch to immediately populate notice if OBS was opened after send
-       */
-      async function fetchLatestNotice() {
-        try {
-          const res = await fetch('/api/latest-notice', { cache: 'no-store' });
-          if (res.ok) {
-            const data = await res.json();
-            if (data && data.visible && data.imageData) {
-              showNotice(data.imageData, data.timestamp);
-            }
+      // 2. Initialize Realtime Session Listener
+      console.log('[OBS Display] Connecting to session:', sessionId);
+      updateStatus('Connecting session...', 'disconnected');
+
+      try {
+        if (typeof firebase !== 'undefined') {
+          if (!firebase.apps.length) {
+            firebase.initializeApp(FIREBASE_CONFIG);
           }
-        } catch (err) {
-          console.warn('[OBS Browser] Could not fetch initial notice:', err);
+
+          const db = firebase.database();
+          const sessionRef = db.ref('obsSessions/' + sessionId + '/current');
+
+          // Realtime listener: fires immediately with current notice & on every new Send to OBS
+          sessionRef.on('value', function (snapshot) {
+            const data = snapshot.val();
+            if (data && data.visible && data.imageData) {
+              console.log('[OBS Display] Notice received:', data.vehicleNumber);
+              showNotice(data.imageData, data.timestamp);
+            } else {
+              console.log('[OBS Display] No active notice / Cleared');
+              clearNotice();
+            }
+            updateStatus('OBS Live (Ready)', 'connected');
+          }, function (error) {
+            console.error('[OBS Display] Firebase error:', error);
+            updateStatus('Sync Error: ' + error.message, 'disconnected');
+          });
         }
+      } catch (err) {
+        console.error('[OBS Display] Firebase init failed:', err);
+        updateStatus('Init Error', 'disconnected');
       }
 
-      /**
-       * Real-time Server-Sent Events (SSE) listener
-       */
-      function connectSSE() {
-        if (sseConnection) {
-          sseConnection.close();
-        }
-
+      // If running on local server port 3000, also listen for local SSE broadcast
+      if (window.location.port === '3000' || window.location.hostname === 'localhost') {
         try {
-          sseConnection = new EventSource('/api/obs-events');
-
-          sseConnection.addEventListener('connected', function (e) {
-            console.log('[OBS Browser] Connected to SSE stream.');
-            updateStatus('OBS Connected (Ready)', 'connected');
-          });
-
-          sseConnection.addEventListener('update', function (e) {
+          const sse = new EventSource('/api/obs-events');
+          sse.addEventListener('update', function (e) {
             try {
               const data = JSON.parse(e.data);
-              if (data.visible && data.imageData) {
-                showNotice(data.imageData, data.timestamp);
-              } else if (!data.visible) {
-                clearNotice();
-              }
-            } catch (err) {
-              console.error('[OBS Browser] Error parsing update event:', err);
-            }
+              if (data.visible && data.imageData) showNotice(data.imageData, data.timestamp);
+              else clearNotice();
+            } catch (err) {}
           });
-
-          sseConnection.addEventListener('clear', function () {
-            clearNotice();
-          });
-
-          sseConnection.onerror = function (err) {
-            console.warn('[OBS Browser] SSE connection lost. Will reconnect automatically...', err);
-            updateStatus('Reconnecting...', 'disconnected');
-          };
-
-        } catch (err) {
-          console.error('[OBS Browser] SSE init error:', err);
-          updateStatus('Connection Error', 'disconnected');
-        }
+          sse.addEventListener('clear', clearNotice);
+        } catch (e) {}
       }
-
-      // 1. Initial fetch & SSE connection
-      fetchLatestNotice();
-      connectSSE();
-
-      // 2. High-reliability fallback polling (checks every 3 seconds in case SSE drops)
-      setInterval(async function () {
-        try {
-          const res = await fetch('/api/status', { cache: 'no-store' });
-          if (res.ok) {
-            const status = await res.json();
-            if (status.hasActiveNotice && status.lastUpdated !== currentTimestamp) {
-              fetchLatestNotice();
-            }
-          }
-        } catch (e) {
-          // Server might be temporarily reloading, continue gracefully
-        }
-      }, 3000);
 
     })();
   </script>

@@ -22,9 +22,16 @@
         "destination": "/obs.html"
       },
       {
+        "source": "/obs/**",
+        "destination": "/obs.html"
+      },
+      {
         "source": "**",
         "destination": "/index.html"
       }
     ]
+  },
+  "database": {
+    "rules": "database.rules.json"
   }
 }

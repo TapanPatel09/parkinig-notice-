@@ -1,0 +1,10 @@
+{
+  "rules": {
+    "obsSessions": {
+      "$sessionId": {
+        ".read": true,
+        ".write": true
+      }
+    }
+  }
+}
